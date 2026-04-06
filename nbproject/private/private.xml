@@ -49,8 +49,10 @@
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/category/list.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/controller/RegisterServlet.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/controller/LogoutServlet.java</file>
+            <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/import_update.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/book_save.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/model/Message.java</file>
+            <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/import_save.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/DAO/MyConnection.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/DAO/BookImportDAO.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/user/book_list.jsp</file>

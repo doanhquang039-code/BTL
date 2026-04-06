@@ -4,18 +4,18 @@
  */
 package model;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class BookImport {
     private int importId;
     private Book book; // Liên kết đến đối tượng Book
     private int importQuantity;
-    private Date importDate;
+private Timestamp importDate;
     private String importedBy;
 
     public BookImport() {}
 
-    public BookImport(int importId, Book book, int importQuantity, Date importDate, String importedBy) {
+    public BookImport(int importId, Book book, int importQuantity, Timestamp importDate, String importedBy) {
         this.importId = importId;
         this.book = book;
         this.importQuantity = importQuantity;
@@ -47,13 +47,7 @@ public class BookImport {
         this.importQuantity = importQuantity;
     }
 
-    public Date getImportDate() {
-        return importDate;
-    }
-
-    public void setImportDate(Date importDate) {
-        this.importDate = importDate;
-    }
+   
 
     public String getImportedBy() {
         return importedBy;
@@ -62,5 +56,13 @@ public class BookImport {
     public void setImportedBy(String importedBy) {
         this.importedBy = importedBy;
     }
-   
+    public Timestamp getImportDate() {
+        return importDate;
+    }
+
+    public void setImportDate(Timestamp importDate) {
+        this.importDate = importDate;
+    }
+
+
 }

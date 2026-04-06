@@ -12,7 +12,7 @@ import java.util.List;
 public class UserDAO {
     private Connection connection;
     private static UserDAO instance;
-
+   
     private UserDAO() {
         try {
             connection = MyConnection.getInstance();
@@ -26,6 +26,19 @@ public class UserDAO {
         return instance;
     }
 
+ 
+
+    // Hàm bổ sung để làm mới kết nối nếu bị ngắt hoặc null
+    private void refreshConnection() {
+        try {
+            // Kiểm tra nếu connection null hoặc đã đóng thì mới lấy mới
+            if (this.connection == null || this.connection.isClosed()) {
+                this.connection = MyConnection.getInstance();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     public User checkLogin(String username, String password) {
         String sql = "SELECT * FROM Users WHERE username = ? AND password = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {

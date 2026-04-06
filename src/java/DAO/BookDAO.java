@@ -44,7 +44,21 @@ public class BookDAO {
         }
         return list;
     }
-
+// Trong BookDAO.java
+public void updateStockAfterImport(int bookCode, int quantity) {
+    // Cập nhật cả quantity (tồn kho hiện tại) và total_imported (tổng lịch sử nhập)
+    String sql = "UPDATE Books SET quantity = quantity + ?, total_imported = total_imported + ? WHERE bookcode = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, quantity);
+        ps.setInt(2, quantity);
+        ps.setInt(3, bookCode);
+        
+        int rows = ps.executeUpdate();
+        System.out.println("DEBUG DAO: Da cap nhat kho cho Book " + bookCode + " - Rows: " + rows);
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
     // 2. Thêm sách mới
     public void add(Book b) {
         String sql = "INSERT INTO Books (title, author, category_code, publish_year, quantity, image) VALUES (?, ?, ?, ?, ?, ?)";
@@ -150,6 +164,17 @@ public class BookDAO {
         }
     } catch (SQLException e) {
         System.err.println("Lỗi khi cập nhật số lượng sách: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+  public void updateStock(int bookCode, int quantity) {
+    // quantity ở đây có thể là số âm (khi xóa) hoặc dương (khi thêm/sửa tăng)
+    String sql = "UPDATE Books SET quantity = quantity + ? WHERE bookcode = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, quantity);
+        ps.setInt(2, bookCode);
+        ps.executeUpdate();
+    } catch (SQLException e) {
         e.printStackTrace();
     }
 }

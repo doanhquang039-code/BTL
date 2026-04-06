@@ -28,15 +28,24 @@ public class BookImportServiceImpl extends BookImportService {
         // Logic bổ sung: Có thể gọi BookDAO.updateQuantity() tại đây
     }
 
-    @Override
-    public void update(BookImport e, int id) {}
+    // Trong service.impl.BookImportServiceImpl
+@Override
+public void update(BookImport e, int id) {
+    importDAO.update(e); // Phải gọi DAO
+}
 
-    @Override
-    public void delete(int id) {}
+@Override
+public void delete(int id) {
+    importDAO.delete(id); // Phải gọi DAO
+}
+
+@Override
+public BookImport findById(int id) {
+    return importDAO.findById(id); // KHÔNG ĐƯỢC return null ở đây
+}
 
     @Override
     public List<BookImport> findAll() { return importDAO.findAll(); }
 
-    @Override
-    public BookImport findById(int id) { return null; }
+   
 }

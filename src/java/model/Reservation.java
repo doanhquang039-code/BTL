@@ -28,7 +28,7 @@ public class Reservation {
         this.returnDate = returnDate;
         this.isNotified = isNotified;
     }
-
+private boolean notified;
     public int getReservationCode() {
         return reservationCode;
     }
@@ -92,13 +92,13 @@ public class Reservation {
     public void setIsNotified(boolean isNotified) {
         this.isNotified = isNotified;
     }
+    
 
-    public void setNotified(boolean aBoolean) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public void setNotified(boolean notified) {
+    this.notified = notified; // Gán giá trị bình thường
+}
 
-    public boolean isNotified() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-  
+public boolean isNotified() {
+    return notified;
+}
 }

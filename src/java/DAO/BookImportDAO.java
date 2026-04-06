@@ -27,19 +27,6 @@ public class BookImportDAO {
         return instance;
     }
 
-    // 1. Thêm mới phiếu nhập kho
-    public void addImport(BookImport bi) {
-        String sql = "INSERT INTO book_imports (book_code, import_quantity, import_date, imported_by) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, bi.getBook().getBookCode());
-            ps.setInt(2, bi.getImportQuantity());
-            ps.setDate(3, bi.getImportDate());
-            ps.setString(4, bi.getImportedBy());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     // 2. Lấy tất cả lịch sử nhập kho (JOIN với bảng Books để lấy tiêu đề sách)
     public List<BookImport> findAll() {
@@ -68,18 +55,7 @@ public class BookImportDAO {
         return null;
     }
 
-    // 4. Cập nhật thông tin nhập kho
-    public void update(BookImport bi) {
-        String sql = "UPDATE book_imports SET book_code = ?, import_quantity = ?, import_date = ?, imported_by = ? WHERE import_id = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, bi.getBook().getBookCode());
-            ps.setInt(2, bi.getImportQuantity());
-            ps.setDate(3, bi.getImportDate());
-            ps.setString(4, bi.getImportedBy());
-            ps.setInt(5, bi.getImportId());
-            ps.executeUpdate();
-        } catch (SQLException e) { e.printStackTrace(); }
-    }
+    
 
     // 5. Xóa phiếu nhập kho
     public void delete(int id) {
@@ -95,8 +71,8 @@ public class BookImportDAO {
         BookImport bi = new BookImport();
         bi.setImportId(rs.getInt("import_id"));
         bi.setImportQuantity(rs.getInt("import_quantity"));
-        bi.setImportDate(rs.getDate("import_date"));
-        bi.setImportedBy(rs.getString("imported_by"));
+       bi.setImportDate(rs.getTimestamp("import_date"));
+    bi.setImportedBy(rs.getString("imported_by"));
 
         Book b = new Book();
         b.setBookCode(rs.getInt("book_code"));
@@ -104,4 +80,38 @@ public class BookImportDAO {
         bi.setBook(b);
         return bi;
     }
+    // 1. Thêm mới phiếu nhập kho
+public void addImport(BookImport bi) {
+    String sql = "INSERT INTO book_imports (book_code, import_quantity, import_date, imported_by) VALUES (?, ?, ?, ?)";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, bi.getBook().getBookCode());
+        ps.setInt(2, bi.getImportQuantity());
+        
+        // DÙNG setTimestamp để lưu cả Giờ:Phút:Giây
+        ps.setTimestamp(3, bi.getImportDate()); 
+        
+        ps.setString(4, bi.getImportedBy());
+        ps.executeUpdate();
+    } catch (SQLException e) { e.printStackTrace(); }
+}
+
+public void update(BookImport bi) {
+    // Đảm bảo thứ tự dấu ? khớp với ps.set... bên dưới
+    String sql = "UPDATE book_imports SET book_code = ?, import_quantity = ?, import_date = ?, imported_by = ? WHERE import_id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, bi.getBook().getBookCode());
+        ps.setInt(2, bi.getImportQuantity());
+        
+        // PHẢI lấy từ đối tượng bi và dùng setTimestamp
+        ps.setTimestamp(3, bi.getImportDate()); 
+        
+        ps.setString(4, bi.getImportedBy());
+        ps.setInt(5, bi.getImportId());
+        
+        int rowsAffected = ps.executeUpdate();
+        System.out.println("DEBUG DAO: Cap nhat Import ID " + bi.getImportId() + " - Rows: " + rowsAffected);
+    } catch (SQLException e) { 
+        e.printStackTrace(); 
+    }
+}
 }
