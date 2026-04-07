@@ -132,4 +132,17 @@ public void delete(int penaltyCode) {
     } catch (SQLException e) { e.printStackTrace(); }
     return null;
 }
+    public int countActivePenalties() {
+    // Giả sử bạn có cột status: 0 là chưa xử lý, 1 là đã xử lý
+    String sql = "SELECT COUNT(*) FROM Penalties WHERE status = 0";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 }

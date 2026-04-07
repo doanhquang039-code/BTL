@@ -32,16 +32,20 @@ public class LoginServlet extends HttpServlet {
 
             // Phân quyền điều hướng
             String role = account.getRole();
-            if (role.equals("admin")) {
-                response.sendRedirect(request.getContextPath() + "/admin/book_list.jsp");
-            } else if (role.equals("manager")) {
-                response.sendRedirect(request.getContextPath() + "/manager/dashboard.jsp");
-            }
-                else if (role.equals("user")) {
-                response.sendRedirect(request.getContextPath() + "/user/dashboard.jsp");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/index.html");
-            }
+           // Dùng equalsIgnoreCase để Admin, admin, ADMIN đều chạy được
+if (role.equalsIgnoreCase("admin")) {
+    response.sendRedirect(request.getContextPath() + "/admin/dashboard.jsp");
+} 
+else if (role.equalsIgnoreCase("manager")) {
+    response.sendRedirect(request.getContextPath() + "/manager/dashboard.jsp");
+} 
+else if (role.equalsIgnoreCase("user")) {
+    response.sendRedirect(request.getContextPath() + "/user/dashboard.jsp");
+} 
+else {
+    // Nếu role không khớp bất cứ cái nào ở trên
+    response.sendRedirect(request.getContextPath() + "/index.jsp");
+}
         } else {
             request.setAttribute("error", "Sai tài khoản hoặc mật khẩu!");
             request.getRequestDispatcher("login.jsp").forward(request, response);

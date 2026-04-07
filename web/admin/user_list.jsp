@@ -116,7 +116,12 @@
         </div>
     </div>
 </div>
-
+<div class="d-flex align-items-center mb-4">
+    <a href="dashboard.jsp" class="btn btn-outline-secondary btn-sm me-3">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    <h2 class="mb-0 fw-bold text-primary">Quản lý Nhập kho</h2>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

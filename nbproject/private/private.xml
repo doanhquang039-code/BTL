@@ -19,8 +19,11 @@
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/service/impl/PenaltyServiceImpl.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/borrow_save.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/DAO/PenaltyDAO.java</file>
+            <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/assets/css/dashboard_style.css.html</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/service/UserService.java</file>
+            <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/user/dashboard.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/service/ReservationService.java</file>
+            <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/controller/AdminDashboardServlet.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/model/Book.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/reservation_list.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/penalty_list.jsp</file>
@@ -33,6 +36,7 @@
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/user_save.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/model/Reservation.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/service/impl/UserServiceImpl.java</file>
+            <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/dashboard.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/DAO/BorrowingDAO.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/service/impl/BookServiceImpl.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/service/impl/BorrowingServiceImpl.java</file>
@@ -67,6 +71,7 @@
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/controller/ReservationServlet.java</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/admin/penalty_save.jsp</file>
             <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/src/java/controller/UserServlet.java</file>
+            <file>file:/D:/Users/admoi/Documents/NetBeansProjects/WebApplication5/web/manager/dashboard.jsp</file>
         </group>
     </open-files>
 </project-private>

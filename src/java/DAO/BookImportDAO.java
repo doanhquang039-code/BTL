@@ -114,4 +114,19 @@ public void update(BookImport bi) {
         e.printStackTrace(); 
     }
 }
+public int countImportsThisMonth() {
+    // Lọc các bản ghi có tháng và năm trùng với hiện tại
+    String sql = "SELECT COUNT(*) FROM book_imports " +
+                 "WHERE MONTH(import_date) = MONTH(CURRENT_DATE()) " +
+                 "AND YEAR(import_date) = YEAR(CURRENT_DATE())";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 }

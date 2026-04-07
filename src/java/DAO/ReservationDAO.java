@@ -117,4 +117,16 @@ public class ReservationDAO {
         res.setNotified(rs.getBoolean("is_notified"));
         return res;
     }
+    public int countPendingReservations() {
+    String sql = "SELECT COUNT(*) FROM Reservations WHERE status = 'Pending'";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 }

@@ -178,4 +178,26 @@ public void updateStockAfterImport(int bookCode, int quantity) {
         e.printStackTrace();
     }
 }
+  public int countTotalBooksInStock() {
+    String sql = "SELECT SUM(quantity) FROM Books";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
+
+// Nếu bạn muốn đếm có bao nhiêu ĐẦU SÁCH khác nhau
+public int countBookTitles() {
+    String sql = "SELECT COUNT(*) FROM Books";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) return rs.getInt(1);
+    } catch (SQLException e) { e.printStackTrace(); }
+    return 0;
+}
 }

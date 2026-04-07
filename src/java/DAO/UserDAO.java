@@ -133,4 +133,17 @@ public void update(User u) {
     }
     return false;
 }
+    public int countTotalUsers() {
+    // Đếm tất cả trừ Admin nếu bạn muốn chỉ đếm người dùng/thành viên
+    String sql = "SELECT COUNT(*) FROM Users WHERE role != 'Admin'";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 }
