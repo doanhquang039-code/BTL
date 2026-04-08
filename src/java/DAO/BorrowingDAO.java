@@ -121,5 +121,21 @@ public Borrowing findById(int id) {
         br.setStatus(rs.getString("status"));
         return br;
     }
+public int countPendingApprovals() {
+    String sql = "SELECT COUNT(*) FROM borrows WHERE status = 'Pending'";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) return rs.getInt(1);
+    } catch (SQLException e) { e.printStackTrace(); }
+    return 0;
+}
 
+public int countTodayBorrows() {
+    String sql = "SELECT COUNT(*) FROM borrows WHERE DATE(borrow_date) = CURRENT_DATE";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) return rs.getInt(1);
+    } catch (SQLException e) { e.printStackTrace(); }
+    return 0;
+}
 }

@@ -145,4 +145,13 @@ public void delete(int penaltyCode) {
     }
     return 0;
 }
+    public int countOverdueBooks() {
+    // Đếm các bản ghi có ngày trả dự kiến nhỏ hơn ngày hiện tại và chưa trả
+    String sql = "SELECT COUNT(*) FROM borrows WHERE due_date < CURRENT_DATE AND return_date IS NULL";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) return rs.getInt(1);
+    } catch (SQLException e) { e.printStackTrace(); }
+    return 0;
+}
 }
