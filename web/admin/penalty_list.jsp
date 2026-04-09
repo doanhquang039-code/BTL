@@ -1,8 +1,3 @@
-<%-- 
-    Document   : penalty_list.jsp
-    Created on : Jan 19, 2026, 7:51:11 PM
-    Author     : admoi
---%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -10,88 +5,168 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý vi phạm | Hệ thống Thư viện</title>
+    <title>Quản lý vi phạm | Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; }
-        .table-card { border-radius: 15px; border: none; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); }
-        /* Tông màu đỏ chủ đạo cho trang vi phạm */
-        .table thead { background-color: #dc3545; color: white; }
-        .badge-status { font-size: 0.8rem; padding: 0.6em 1em; border-radius: 30px; min-width: 110px; }
-        .table td { vertical-align: middle; }
+        body { background-color: #f8f9fa; font-family: 'Inter', system-ui, sans-serif; }
+        
+        .main-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .header-red {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            padding: 1.5rem 2rem;
+        }
+
+        /* Styling Table */
+        .table thead th {
+            background-color: #fdfdfd;
+            color: #e74c3c;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            border: none;
+            padding: 1rem;
+        }
+        
+        .table tbody td {
+            padding: 1.2rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f1f4;
+        }
+
+        /* Badge Trạng thái - Soft Style */
+        .badge-status {
+            font-weight: 700;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            min-width: 130px;
+            display: inline-block;
+        }
+        .status-paid { background-color: #e8fff3; color: #50cd89; } /* Đã thanh toán - Xanh */
+        .status-unpaid { background-color: #fff5f8; color: #f1416c; } /* Chưa thanh toán - Đỏ */
+
+        /* Money text */
+        .amount-text {
+            color: #e74c3c;
+            font-weight: 800;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .btn-edit { background-color: #fff4e5; color: #ff9800; }
+        .btn-delete { background-color: #ffe5e5; color: #f44336; }
+        .action-btn:hover { transform: scale(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
+        .reason-box {
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #495057;
+            border-left: 3px solid #dee2e6;
+        }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
-    <div class="card table-card">
-        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0 fs-5 fw-bold"><i class="bi bi-exclamation-octagon me-2"></i> DANH SÁCH VI PHẠM</h5>
+<div class="container-fluid py-5 px-lg-5">
+    <div class="card main-card">
+        <div class="header-red d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0 text-white fw-bold"><i class="bi bi-exclamation-octagon-fill me-2 text-white"></i>DANH SÁCH VI PHẠM</h4>
+                <small class="text-white-50">Kiểm soát xử phạt và trạng thái bồi thường</small>
+            </div>
             <div class="d-flex gap-2">
-                <a href="${pageContext.request.contextPath}/penalties" class="btn btn-light btn-sm fw-bold">
-                    <i class="bi bi-arrow-clockwise"></i> Làm mới
+                <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn btn-outline-light border-0">
+                    <i class="bi bi-house-door fs-5"></i>
                 </a>
-                <a href="penalties?action=create" class="btn btn-dark btn-sm fw-bold">
-                    <i class="bi bi-plus-circle me-1"></i> Thêm vi phạm
+                <a href="penalties?action=create" class="btn btn-light fw-bold px-4 shadow-sm text-danger">
+                    <i class="bi bi-plus-circle-fill me-1"></i> THÊM MỚI
                 </a>
             </div>
         </div>
-        
-        <div class="card-body p-0"> <%-- Bỏ padding để bảng sát lề card --%>
+
+        <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead class="text-center align-middle">
-                        <tr>
-                            <th style="width: 8%">Mã Phạt</th>
-                            <th style="width: 18%" class="text-start ps-4">Thành viên</th>
-                            <th style="width: 10%">Mã Phiếu</th>
-                            <th style="width: 25%" class="text-start">Lý do vi phạm</th>
-                            <th style="width: 12%">Tiền phạt</th>
-                            <th style="width: 15%">Trạng thái</th>
-                            <th style="width: 12%">Hành động</th>
+                    <thead>
+                        <tr class="text-center">
+                            <th>ID PHẠT</th>
+                            <th class="text-start">THÀNH VIÊN</th>
+                            <th>MÃ PHIẾU</th>
+                            <th class="text-start">LÝ DO VI PHẠM</th>
+                            <th>TIỀN PHẠT</th>
+                            <th>TRẠNG THÁI</th>
+                            <th>HÀNH ĐỘNG</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:forEach var="p" items="${penalties}">
                             <tr class="text-center">
-                                <td class="fw-bold text-secondary">#${p.penaltyCode}</td>
-                                <td class="text-start ps-4">
+                                <td>
+                                    <span class="fw-bold text-muted small">#P-${p.penaltyCode}</span>
+                                </td>
+                                <td class="text-start">
                                     <div class="fw-bold text-dark">${p.user.fullName}</div>
-                                    <small class="text-muted">ID: ${p.user.userCode}</small>
+                                    <small class="text-muted"><i class="bi bi-person-badge me-1"></i>${p.user.userCode}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-primary border fw-semibold">
-                                        ${p.borrowing.borrowingCode}
+                                    <span class="badge bg-light text-primary border px-2 py-1">
+                                        <i class="bi bi-hash"></i>${p.borrowing.borrowingCode}
                                     </span>
                                 </td>
-                                <td class="text-start text-wrap" style="max-width: 250px;">
-                                    ${p.reason}
+                                <td class="text-start">
+                                    <div class="reason-box">
+                                        ${p.reason}
+                                    </div>
                                 </td>
-                                <td class="fw-bold text-danger">
-                                    <fmt:formatNumber value="${p.amount}" type="currency" currencySymbol="" /> 
-                                    <small>VNĐ</small>
+                                <td>
+                                    <div class="amount-text">
+                                        <fmt:formatNumber value="${p.amount}" type="currency" currencySymbol="" />
+                                        <small class="fw-normal">đ</small>
+                                    </div>
                                 </td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${p.status == 'Đã thanh toán'}">
-                                            <span class="badge bg-success badge-status"><i class="bi bi-check-circle me-1"></i> Đã thanh toán</span>
+                                            <span class="badge-status status-paid">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Đã thanh toán
+                                            </span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge bg-danger badge-status"><i class="bi bi-clock-history me-1"></i> Chưa thanh toán</span>
+                                            <span class="badge-status status-unpaid">
+                                                <i class="bi bi-clock-fill me-1"></i>Chưa thanh toán
+                                            </span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
                                 <td>
-                                    <div class="d-flex justify-content-center gap-1">
-                                        <a href="penalties?action=update&id=${p.penaltyCode}" 
-                                           class="btn btn-sm btn-outline-warning" title="Sửa">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="penalties?action=update&id=${p.penaltyCode}" class="action-btn btn-edit" title="Sửa thông tin">
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>
-                                        <a href="penalties?action=delete&id=${p.penaltyCode}" 
-                                           class="btn btn-sm btn-outline-danger" 
-                                           onclick="return confirm('Xác nhận xóa bản ghi này?')" title="Xóa">
-                                            <i class="bi bi-trash-fill"></i>
+                                        <a href="penalties?action=delete&id=${p.penaltyCode}" class="action-btn btn-delete" 
+                                           onclick="return confirm('Xóa bản ghi vi phạm này?')" title="Xóa dữ liệu">
+                                            <i class="bi bi-trash3-fill"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -102,7 +177,7 @@
                             <tr>
                                 <td colspan="7" class="text-center py-5">
                                     <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="mb-3 opacity-25">
-                                    <p class="text-muted">Chưa có ghi nhận vi phạm nào trong hệ thống.</p>
+                                    <p class="text-muted">Hiện tại không có trường hợp vi phạm nào cần xử lý.</p>
                                 </td>
                             </tr>
                         </c:if>

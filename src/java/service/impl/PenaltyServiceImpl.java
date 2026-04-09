@@ -33,13 +33,10 @@ public class PenaltyServiceImpl extends PenaltyService {
         penaltyDAO.createPenalty(e);
     }
 
-  @Override
-public void update(Penalty e, int id) {
-    // Đảm bảo đối tượng Penalty có ID đúng trước khi gửi xuống DAO
-    e.setPenaltyCode(id); 
-    
-    // Gọi hàm update toàn bộ các trường thay vì chỉ updateStatus
-    penaltyDAO.update(e); 
+  
+@Override
+public void update(Penalty p, int id) {
+    penaltyDAO.update(p); // Gọi sang DAO để thực thi SQL
 }
 
     @Override

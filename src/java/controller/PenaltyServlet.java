@@ -101,26 +101,19 @@ public class PenaltyServlet extends HttpServlet {
             request.getRequestDispatcher("/admin/penalty_save.jsp").forward(request, response);
         }
     }
-
-  private void updatePost(HttpServletRequest request, HttpServletResponse response)
+private void updatePost(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
     try {
-        // Lấy đúng tên 'penaltyCode' từ thẻ <input name="penaltyCode">
-        String pCodeRaw = request.getParameter("penaltyCode");
-        if (pCodeRaw == null || pCodeRaw.isEmpty()) {
-            System.out.println("LOI: Khong lay duoc penaltyCode tu JSP!");
-            response.sendRedirect("penalties?msg=error");
-            return;
-        }
-        
-        int penaltyCode = Integer.parseInt(pCodeRaw);
+        int penaltyCode = Integer.parseInt(request.getParameter("penaltyCode"));
         int userCode = Integer.parseInt(request.getParameter("userCode"));
-        int borrowingCode = Integer.parseInt(request.getParameter("borrowingCode"));
-        String amountStr = request.getParameter("amount");
-        String reason = request.getParameter("reason");
-        String status = request.getParameter("status");
-
-        // Đóng gói đối tượng
+        
+        // Xử lý borrowingCode: Nếu trống thì để 0 hoặc giá trị mặc định
+        String brCodeRaw = request.getParameter("borrowingCode");
+        int borrowingCode = (brCodeRaw != null && !brCodeRaw.isEmpty()) ? Integer.parseInt(brCodeRaw) : 0;
+        
+        // Làm sạch chuỗi tiền tệ trước khi chuyển sang BigDecimal
+        String amountStr = request.getParameter("amount").replaceAll("[^\\d.]", ""); 
+        
         Penalty p = new Penalty();
         p.setPenaltyCode(penaltyCode);
         
@@ -133,14 +126,13 @@ public class PenaltyServlet extends HttpServlet {
         p.setBorrowing(br);
         
         p.setAmount(new java.math.BigDecimal(amountStr));
-        p.setReason(reason);
-        p.setStatus(status);
+        p.setReason(request.getParameter("reason"));
+        p.setStatus(request.getParameter("status"));
 
-        // Gọi Service
         penaltyService.update(p, penaltyCode);
-        
         response.sendRedirect("penalties?msg=updated");
     } catch (Exception e) {
+        System.out.println("LOI UPDATE: " + e.getMessage());
         e.printStackTrace();
         response.sendRedirect("penalties?msg=error");
     }

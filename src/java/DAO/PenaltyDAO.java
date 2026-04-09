@@ -54,22 +54,29 @@ public class PenaltyDAO {
     return list;
 }
 public void update(Penalty p) {
-    // SQL cập nhật 5 trường dựa trên penaltiecode
-    String sql = "UPDATE penalties SET user_code = ?, borrowing_code = ?, " +
+    String sql = "UPDATE Penalties SET user_code = ?, borrowing_code = ?, " +
                  "amount = ?, reason = ?, status = ? " +
                  "WHERE penaltiecode = ?"; 
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
         ps.setInt(1, p.getUser().getUserCode());
-        ps.setInt(2, p.getBorrowing().getBorrowingCode());
+        
+        // Nếu không có mã phiếu mượn (bằng 0), gán NULL vào DB
+        if (p.getBorrowing().getBorrowingCode() <= 0) {
+            ps.setNull(2, java.sql.Types.INTEGER);
+        } else {
+            ps.setInt(2, p.getBorrowing().getBorrowingCode());
+        }
+        
         ps.setBigDecimal(3, p.getAmount());
         ps.setString(4, p.getReason());
         ps.setString(5, p.getStatus());
         ps.setInt(6, p.getPenaltyCode());
         
-        int rowsAffected = ps.executeUpdate(); 
-        // Log này sẽ hiện ở tab Output của NetBeans
+        int rowsAffected = ps.executeUpdate();
         System.out.println("DEBUG DAO: Ket qua Update ID " + p.getPenaltyCode() + " -> Rows: " + rowsAffected);
-    } catch (SQLException e) { e.printStackTrace(); }
+    } catch (SQLException e) { 
+        e.printStackTrace(); 
+    }
 }
 public void delete(int penaltyCode) {
     String sql = "DELETE FROM Penalties WHERE penaltiecode = ?"; // Phải là penaltiecode

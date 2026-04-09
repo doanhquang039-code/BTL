@@ -13,7 +13,7 @@ import model.User;
 import service.BorrowingService;
 import service.impl.BorrowingServiceImpl;
 
-@WebServlet(name = "BorrowingServlet", urlPatterns = {"/borrow"})
+@WebServlet(name = "BorrowingServlet", urlPatterns = {"/borrows"})
 public class BorrowingServlet extends HttpServlet {
     private final BorrowingService borrowingService = BorrowingServiceImpl.getInstance();
 

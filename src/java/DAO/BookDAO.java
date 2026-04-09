@@ -144,6 +144,7 @@ public void updateStockAfterImport(int bookCode, int quantity) {
         b.setTitle(rs.getString("title"));
         b.setAuthor(rs.getString("author"));
         b.setQuantity(rs.getInt("quantity"));
+        b.setTotalImported(rs.getInt("total_imported"));
         b.setImage(rs.getString("image")); // QUAN TRỌNG: Cần lấy cột này để hiện ảnh
         b.setPublishYear(rs.getString("publish_year"));
         
@@ -199,5 +200,18 @@ public int countBookTitles() {
         if (rs.next()) return rs.getInt(1);
     } catch (SQLException e) { e.printStackTrace(); }
     return 0;
+}
+// Trong BookDAO.java
+public void updateFullStock(int bookCode, int delta) {
+    // delta có thể là số dương (khi thêm/sửa tăng) hoặc số âm (khi xóa/sửa giảm)
+    String sql = "UPDATE Books SET quantity = quantity + ?, total_imported = total_imported + ? WHERE bookcode = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, delta);
+        ps.setInt(2, delta);
+        ps.setInt(3, bookCode);
+        ps.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
 }
 }

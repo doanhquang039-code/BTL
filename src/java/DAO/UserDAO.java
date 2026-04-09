@@ -146,4 +146,28 @@ public void update(User u) {
     }
     return 0;
 }
+   public void register(User u) {
+    // Để ý kỹ đoạn: VALUES (?, ?, ?, 'user')
+    // Mình viết thẳng chữ 'user' vào SQL luôn cho chắc ăn
+    String sql = "INSERT INTO Users (username, password, fullname, role) VALUES (?, ?, ?, 'user')";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setString(1, u.getUsername());
+        ps.setString(2, u.getPassword());
+        ps.setString(3, u.getFullName());
+        ps.executeUpdate();
+    } catch (SQLException e) { 
+        e.printStackTrace(); 
+    }
+}
+
+    public int countAll() {
+    String sql = "SELECT COUNT(*) FROM Users";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) return rs.getInt(1);
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 }

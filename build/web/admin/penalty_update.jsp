@@ -29,53 +29,22 @@
             </h5>
         </div>
         <div class="card-body p-4">
-            <form action="penalties?action=update" method="post">
-                <input type="hidden" name="penaltyCode" value="${penalty.penaltyCode}">
+         <form action="penalties" method="post">
+    <input type="hidden" name="penaltyCode" value="${penalty.penaltyCode}">
+    <input type="hidden" name="action" value="update">
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Mã Thành Viên</label>
-                        <input type="text" class="form-control bg-light" value="${penalty.user.userCode}" readonly>
-                        <input type="hidden" name="userCode" value="${penalty.user.userCode}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Mã Phiếu Mượn</label>
-                        <input type="text" class="form-control bg-light" value="${penalty.borrowing.borrowingCode}" readonly>
-                        <input type="hidden" name="borrowingCode" value="${penalty.borrowing.borrowingCode}">
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label text-danger">Số tiền phạt (VNĐ)</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-danger text-white">₫</span>
-                        <input type="number" step="1000" name="amount" class="form-control fw-bold" 
-                               value="${penalty.amount}" required>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Lý do vi phạm</label>
-                    <textarea name="reason" class="form-control" rows="3" required>${penalty.reason}</textarea>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label">Trạng thái thanh toán</label>
-                    <select name="status" class="form-select border-primary">
-                        <option value="Chưa thanh toán" ${penalty.status == 'Chưa thanh toán' ? 'selected' : ''}>Chưa thanh toán</option>
-                        <option value="Đã thanh toán" ${penalty.status == 'Đã thanh toán' ? 'selected' : ''}>Đã thanh toán</option>
-                    </select>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
-                        <i class="bi bi-save me-1"></i> LƯU THAY ĐỔI
-                    </button>
-                    <a href="penalties" class="btn btn-outline-secondary w-100 fw-bold py-2">
-                        QUAY LẠI
-                    </a>
-                </div>
-            </form>
+    Mã người dùng: <input type="number" name="userCode" value="${penalty.user.userCode}">
+    Mã phiếu mượn: <input type="number" name="borrowingCode" value="${penalty.borrowing.borrowingCode}">
+    Số tiền: <input type="text" name="amount" value="${penalty.amount}">
+    Lý do: <input type="text" name="reason" value="${penalty.reason}">
+    Trạng thái: 
+    <select name="status">
+        <option value="Chưa thanh toán" ${penalty.status == 'Chưa thanh toán' ? 'selected' : ''}>Chưa thanh toán</option>
+        <option value="Đã thanh toán" ${penalty.status == 'Đã thanh toán' ? 'selected' : ''}>Đã thanh toán</option>
+    </select>
+    
+    <button type="submit">Cập nhật</button>
+</form>
         </div>
     </div>
 </div>

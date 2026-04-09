@@ -32,6 +32,9 @@ public class LoginServlet extends HttpServlet {
 
             // Phân quyền điều hướng
             String role = account.getRole();
+            if (role == null) {
+    role = "user"; 
+}
            // Dùng equalsIgnoreCase để Admin, admin, ADMIN đều chạy được
 if (role.equalsIgnoreCase("admin")) {
     response.sendRedirect(request.getContextPath() + "/admin/dashboard.jsp");

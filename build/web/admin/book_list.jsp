@@ -1,7 +1,6 @@
 <%-- 
     Document   : book_list.jsp
-    Created on : Jan 18, 2026, 5:15:59 PM
-    Author     : admoi
+    Mục đích   : Hiển thị danh sách sách dạng lưới (Grid) với đầy đủ thông số chi tiết
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -9,114 +8,166 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý kho sách - Admin</title>
+    <title>Thông số kho sách chi tiết | Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        
+        .book-card {
+            border: none;
+            border-radius: 20px;
+            background: #fff;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+
+        /* Vùng chứa ảnh bìa */
+        .img-area {
+            height: 320px;
+            position: relative;
+            background: #e9ecef;
+            border-radius: 20px 20px 0 0;
+            overflow: hidden;
+        }
+
         .book-img {
-            width: 60px;
-            height: 80px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 4px;
+        }
+
+        /* Badge trạng thái */
+        .status-badge {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Thông tin chi tiết */
+        .info-area { padding: 20px; flex-grow: 1; }
+        
+        .book-id { font-size: 0.8rem; color: #6c757d; font-weight: 600; margin-bottom: 5px; }
+        .book-title { font-size: 1.2rem; font-weight: 800; color: #1a1c1e; margin-bottom: 10px; line-height: 1.4; }
+        
+        /* Bảng thông số cụ thể */
+        .specs-table { font-size: 0.85rem; width: 100%; margin-bottom: 15px; }
+        .specs-table td { padding: 4px 0; }
+        .label-spec { color: #8e94a0; width: 40%; }
+        .value-spec { color: #2d3436; font-weight: 600; }
+
+        /* Vùng kho bãi */
+        .stock-zone {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .action-zone {
+            padding: 15px 20px 25px;
+            border-top: 1px dashed #dee2e6;
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
 <div class="container py-5">
-    <div class="card shadow">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">DANH SÁCH TẤT CẢ SÁCH</h3>
-            <a href="${pageContext.request.contextPath}/books?action=create" class="btn btn-success">
-                <i class="bi bi-plus-circle"></i> Thêm sách mới
-            </a>
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-6">
+            <h2 class="fw-bold m-0"><i class="bi bi-box-seam-fill text-primary me-2"></i>THÔNG SỐ KHO SÁCH</h2>
+            <p class="text-muted">Dữ liệu chi tiết về tác giả, năm sản xuất và tồn kho thực tế.</p>
         </div>
-        
-        <div class="card-body">
-          <form action="${pageContext.request.contextPath}/books" method="post" class="row g-3 mb-4">
-    <input type="hidden" name="action" value="search">
-    
-    <div class="col-auto">
-        <input type="text" name="name" class="form-control" placeholder="Tìm theo tên hoặc tác giả...">
+        <div class="col-md-6 text-end">
+            <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn btn-light border shadow-sm me-2">Trang chủ</a>
+            <a href="${pageContext.request.contextPath}/books?action=create" class="btn btn-primary shadow">Thêm sách mới</a>
+        </div>
     </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-        <a href="${pageContext.request.contextPath}/books" class="btn btn-secondary">Tất cả sách</a>
-    </div>
-</form>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle border">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center">Mã</th>
-                            <th>Ảnh bìa</th>
-                            <th>Tên sách</th>
-                            <th>Tác giả</th>
-                            <th>Danh mục</th>
-                            <th class="text-center">Năm XB</th>
-                            <th class="text-center">Số lượng</th>
-                            <th class="text-center">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="book" items="${books}">
-                            <tr>
-                                <td class="text-center fw-bold">${book.bookCode}</td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${not empty book.image}">
-                                            <img src="${pageContext.request.contextPath}/${book.image}" 
-                                                 class="book-img shadow-sm border" 
-                                                 onerror="this.src='https://via.placeholder.com/60x80?text=No+Img'">
-                                        </c:when>
-                                        <c:otherwise>
-                                            <img src="https://via.placeholder.com/60x80?text=No+Img" class="book-img border">
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td class="fw-semibold">${book.title}</td>
-                                <td>${book.author}</td>
-                                <td>
-                                    <span class="badge bg-info text-dark">${book.category.name}</span>
-                                </td>
-                                <td class="text-center">${book.publishYear}</td>
-                                <td class="text-center">
-                                    <span class="badge ${book.quantity > 0 ? 'bg-success' : 'bg-danger'}">
-                                        ${book.quantity}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <a href="${pageContext.request.contextPath}/books?action=update&id=${book.bookCode}" 
-                                       class="btn btn-warning btn-sm me-1 shadow-sm">
-                                        <i class="bi bi-pencil-square"></i> Sửa
-                                    </a>
-                                    
-                                    <a href="${pageContext.request.contextPath}/books?action=delete&id=${book.bookCode}" 
-                                       class="btn btn-danger btn-sm shadow-sm"
-                                       onclick="return confirm('Bạn có chắc chắn muốn xóa cuốn sách: ${book.title}?')">
-                                        <i class="bi bi-trash"></i> Xóa
-                                    </a>
-                                </td>
-                            </tr>
-                        </c:forEach>
+    <div class="row g-4">
+        <c:forEach var="book" items="${books}">
+            <div class="col-md-4">
+                <div class="card book-card shadow-sm">
+                    <div class="img-area">
+                        <c:choose>
+                            <c:when test="${not empty book.image}">
+                                <img src="${pageContext.request.contextPath}/${book.image}" class="book-img" onerror="this.src='https://via.placeholder.com/320x400?text=Chưa+có+ảnh'">
+                            </c:when>
+                            <c:otherwise>
+                                <img src="https://via.placeholder.com/320x400?text=Chưa+có+ảnh" class="book-img">
+                            </c:otherwise>
+                        </c:choose>
                         
-                     <c:forEach var="book" items="${books}">
-    <tr>
-        </tr>
-</c:forEach>
+                        <c:if test="${book.quantity <= 0}">
+                            <span class="status-badge bg-danger text-white text-uppercase">Hết hàng</span>
+                        </c:if>
+                        <c:if test="${book.quantity > 0}">
+                            <span class="status-badge bg-success text-white text-uppercase">Đang sẵn có</span>
+                        </c:if>
+                    </div>
 
-<c:if test="${empty books}">
-    <tr>
-        <td colspan="8" class="text-center text-danger">
-            Không tìm thấy sách hoặc tác giả nào có tên: <strong>${param.name}</strong>
-        </td>
-    </tr>
-</c:if>
-                    </tbody>
-                </table>
+                    <div class="info-area">
+                        <div class="book-id">MÃ SÁCH: #BT-${book.bookCode}</div>
+                        <div class="book-title text-uppercase">${book.title}</div>
+                        
+                        <table class="specs-table">
+                            <tr>
+                                <td class="label-spec"><i class="bi bi-person-fill me-1"></i>Tác giả:</td>
+                                <td class="value-spec text-primary">${book.author}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-spec"><i class="bi bi-calendar-event me-1"></i>Năm sản xuất:</td>
+                                <td class="value-spec">${book.publishYear}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-spec"><i class="bi bi-tag-fill me-1"></i>Thể loại:</td>
+                                <td class="value-spec">${book.category.name}</td>
+                            </tr>
+                        </table>
+
+                        <div class="stock-zone d-flex justify-content-between">
+                            <div class="text-center w-50 border-end">
+                                <small class="text-muted d-block">Hiện còn</small>
+                                <span class="fw-bold fs-5 text-success">${book.quantity}</span>
+                            </div>
+                            <div class="text-center w-50">
+                                <small class="text-muted d-block">Lịch sử nhập</small>
+                                <span class="fw-bold fs-5 text-primary">${book.totalImported}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-zone">
+                        <div class="row g-2">
+                            <div class="col-9">
+                                <a href="${pageContext.request.contextPath}/books?action=update&id=${book.bookCode}" class="btn btn-warning w-100 fw-bold">
+                                    <i class="bi bi-pencil-square me-2"></i>CHỈNH SỬA
+                                </a>
+                            </div>
+                            <div class="col-3">
+                                <a href="${pageContext.request.contextPath}/books?action=delete&id=${book.bookCode}" 
+                                   class="btn btn-outline-danger w-100"
+                                   onclick="return confirm('Xóa dữ liệu sách: ${book.title}?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </c:forEach>
     </div>
 </div>
 

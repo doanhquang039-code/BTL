@@ -105,55 +105,44 @@ private void executeCreate(HttpServletRequest request, HttpServletResponse respo
         response.sendRedirect("imports?action=create&msg=error");
     }
 }
-// --- HÀM UPDATE ---
 private void executeUpdate(HttpServletRequest request, HttpServletResponse response) throws IOException {
     try {
         int id = Integer.parseInt(request.getParameter("importId"));
-        
-        // 1. Lấy dữ liệu cũ để đối soát số lượng
         BookImport oldImport = importService.findById(id);
-        if (oldImport == null) {
-            System.out.println("LỖI: Không tìm thấy phiếu nhập ID " + id);
-            response.sendRedirect("imports?msg=notfound");
-            return;
+        
+        if (oldImport != null) {
+            int oldQty = oldImport.getImportQuantity();
+            BookImport newImport = mapRequestToEntity(request); // Lấy số lượng mới từ form
+            int newQty = newImport.getImportQuantity();
+            
+            // 1. Cập nhật bảng lịch sử nhập
+            newImport.setImportId(id);
+            importService.update(newImport, id);
+            
+            // 2. Cập nhật bảng Books: Tính chênh lệch (Mới - Cũ)
+            int diff = newQty - oldQty;
+            BookDAO.getInstance().updateFullStock(newImport.getBook().getBookCode(), diff);
         }
-        int oldQty = oldImport.getImportQuantity();
-
-        // 2. Lấy dữ liệu mới từ Form
-        BookImport newImport = mapRequestToEntity(request);
-        newImport.setImportId(id);
-        int newQty = newImport.getImportQuantity();
-
-        // 3. Cập nhật bảng lịch sử (DB)
-        importService.update(newImport, id);
-
-        // 4. Cập nhật kho (Số lượng thực tế)
-        int diff = newQty - oldQty;
-        bookService.updateStock(newImport.getBook().getBookCode(), diff);
-
         response.sendRedirect("imports?msg=updated");
     } catch (Exception e) {
-        e.printStackTrace(); // Xem lỗi cụ thể ở tab Output
+        e.printStackTrace();
         response.sendRedirect("imports?msg=error");
     }
 }
 
-// --- HÀM DELETE ---
 private void executeDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
     try {
         int id = Integer.parseInt(request.getParameter("id"));
         BookImport bi = importService.findById(id);
         
         if (bi != null) {
-            // 1. Trừ lại số lượng trong kho trước khi xóa phiếu
-            bookService.updateStock(bi.getBook().getBookCode(), -bi.getImportQuantity());
+            // Trừ đi số lượng đã nhập trong cả tồn kho và tổng lịch sử (truyền số âm)
+            BookDAO.getInstance().updateFullStock(bi.getBook().getBookCode(), -bi.getImportQuantity());
             
-            // 2. Xóa phiếu trong DB
+            // Xóa phiếu
             importService.delete(id);
-            response.sendRedirect("imports?msg=deleted");
-        } else {
-            response.sendRedirect("imports?msg=error");
         }
+        response.sendRedirect("imports?msg=deleted");
     } catch (Exception e) {
         e.printStackTrace();
         response.sendRedirect("imports?msg=error");
