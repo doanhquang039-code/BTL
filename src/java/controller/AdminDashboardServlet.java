@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "AdminDashboardServlet", urlPatterns = {"/dashboard"})
+@WebServlet(name = "AdminDashboardServlet", urlPatterns = {"/admin-dashboard", "/dashboard"})
 public class AdminDashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {

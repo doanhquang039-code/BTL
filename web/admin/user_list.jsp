@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -92,7 +93,7 @@
                 <small class="text-white-50">Quản lý tài khoản, vai trò và bảo mật người dùng</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn btn-outline-light border-0">
+                <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-outline-light border-0">
                     <i class="bi bi-house-door fs-5"></i>
                 </a>
                 <a href="users?action=create" class="btn btn-light fw-bold px-4 shadow-sm text-primary">
@@ -103,12 +104,36 @@
 
         <div class="card-body p-4">
             <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="input-group shadow-sm rounded-3 overflow-hidden">
-                        <input type="text" class="form-control border-0" placeholder="Tìm tên hoặc username...">
-                        <button class="btn btn-primary border-0"><i class="bi bi-search"></i></button>
+                <form action="users" method="get" class="row g-2">
+                    <div class="col-md-5">
+                        <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                            <input type="text" name="keyword" class="form-control border-0" placeholder="Tìm tên hoặc username..." value="${keyword}">
+                            <button class="btn btn-primary border-0" type="submit"><i class="bi bi-search"></i></button>
+                        </div>
                     </div>
-                </div>
+                    <div class="col-md-3">
+                        <select name="role" class="form-select">
+                            <option value="">-- Lọc theo vai trò --</option>
+                            <option value="admin" ${role == 'admin' ? 'selected' : ''}>Admin</option>
+                            <option value="manager" ${role == 'manager' ? 'selected' : ''}>Manager</option>
+                            <option value="user" ${role == 'user' ? 'selected' : ''}>User</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="startsWith" class="form-select">
+                            <option value="">-- Chữ cái --</option>
+                            <c:forEach var="ch" items="${fn:split('A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z', ',')}">
+                                <option value="${ch}" ${startsWith == ch ? 'selected' : ''}>${ch}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-outline-primary w-100" type="submit">Lọc</button>
+                    </div>
+                    <div class="col-md-1">
+                        <a href="users" class="btn btn-outline-secondary w-100">Xóa lọc</a>
+                    </div>
+                </form>
             </div>
 
             <div class="table-responsive">
@@ -183,6 +208,25 @@
                         </c:if>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted">Tổng: ${totalItems} bản ghi</small>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="users?keyword=${keyword}&role=${role}&startsWith=${startsWith}&page=${currentPage - 1}">Trước</a>
+                        </li>
+                        <c:forEach begin="1" end="${totalPages}" var="p">
+                            <li class="page-item ${p == currentPage ? 'active' : ''}">
+                                <a class="page-link" href="users?keyword=${keyword}&role=${role}&startsWith=${startsWith}&page=${p}">${p}</a>
+                            </li>
+                        </c:forEach>
+                        <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+                            <a class="page-link" href="users?keyword=${keyword}&role=${role}&startsWith=${startsWith}&page=${currentPage + 1}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

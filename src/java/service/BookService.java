@@ -13,9 +13,7 @@ import model.Book;
  */
 public abstract class BookService implements Activity<Book>, Search<Book> {
 
-    public void updateStock(int bookCode, int quantity) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public abstract void updateStock(int bookCode, int quantity);
     // Bạn có thể thêm các phương thức đặc thù của Book ở đây
     // Ví dụ: abstract void updateQuantity(int bookId, int amount);
 }

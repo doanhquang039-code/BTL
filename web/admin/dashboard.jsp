@@ -136,8 +136,11 @@
             <li><a href="${pageContext.request.contextPath}/books"><i class="bi bi-book me-3"></i> Quản lý Sách</a></li>
             <li><a href="${pageContext.request.contextPath}/users"><i class="bi bi-people me-3"></i> Quản lý Thành viên</a></li>
             <li><a href="${pageContext.request.contextPath}/imports"><i class="bi bi-box-seam me-3"></i> Nhập kho sách</a></li>
+            <li><a href="${pageContext.request.contextPath}/borrows"><i class="bi bi-journal-check me-3"></i> Quản lý Phiếu mượn</a></li>
+            <li><a href="${pageContext.request.contextPath}/approvals"><i class="bi bi-check2-square me-3"></i> Xem yêu cầu mượn/trả</a></li>
             <li><a href="${pageContext.request.contextPath}/penalties"><i class="bi bi-exclamation-triangle me-3"></i> Quản lý Vi phạm</a></li>
             <li><a href="${pageContext.request.contextPath}/reservations"><i class="bi bi-calendar-check me-3"></i> Đặt trước</a></li>
+            <li><a href="${pageContext.request.contextPath}/statistics"><i class="bi bi-bar-chart-line me-3"></i> Thống kê</a></li>
             <li><a href="${pageContext.request.contextPath}/categories"><i class="bi bi-tags me-3"></i> Quản lý Danh mục</a></li>
             <hr class="mx-3 border-secondary opacity-25">
             <li><a href="${pageContext.request.contextPath}/logout" class="text-danger"><i class="bi bi-box-arrow-right me-3"></i> Đăng xuất</a></li>
@@ -241,7 +244,7 @@
         </div>
         
         <div class="col-md-3">
-            <a href="${pageContext.request.contextPath}/penalties?action=add" class="btn btn-outline-dark w-100 py-5 rounded-4 shadow-sm h-100">
+            <a href="${pageContext.request.contextPath}/penalties?action=create" class="btn btn-outline-dark w-100 py-5 rounded-4 shadow-sm h-100">
                 <i class="bi bi-person-plus d-block display-4 mb-3 text-danger"></i> 
                 <span class="fs-5 fw-bold">Vi phạm</span>
                 <p class="small text-muted mb-0 mt-2">Xử phạt & bồi thường</p>
@@ -253,6 +256,14 @@
                 <i class="bi bi-tags d-block display-4 mb-3" style="color: #764ba2;"></i> 
                 <span class="fs-5 fw-bold">Danh mục</span>
                 <p class="small text-muted mb-0 mt-2">Phân loại kho sách</p>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a href="${pageContext.request.contextPath}/borrows" class="btn btn-outline-dark w-100 py-5 rounded-4 shadow-sm h-100">
+                <i class="bi bi-journal-check d-block display-4 mb-3 text-info"></i> 
+                <span class="fs-5 fw-bold">Phiếu mượn</span>
+                <p class="small text-muted mb-0 mt-2">Theo dõi mượn, trả sách</p>
             </a>
         </div>
 

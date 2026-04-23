@@ -127,18 +127,23 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="approvals">
-                    <i class="bi bi-check2-circle me-3"></i>Duyệt yêu cầu mượn
+                <a class="nav-link" href="${pageContext.request.contextPath}/approvals">
+                    <i class="bi bi-check2-circle me-3"></i>Duyệt yêu cầu mượn/trả
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="penalties">
+                <a class="nav-link" href="${pageContext.request.contextPath}/reservations">
+                    <i class="bi bi-clock-history me-3"></i>Quản lý đặt trước
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="${pageContext.request.contextPath}/penalties">
                     <i class="bi bi-exclamation-octagon me-3"></i>Xử lý vi phạm
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="${pageContext.request.contextPath}/books">
-                    <i class="bi bi-book me-3"></i>Danh mục sách
+                    <i class="bi bi-book me-3"></i>Quản lý sách
                 </a>
             </li>
             <hr class="mx-3 border-secondary opacity-25">
@@ -158,9 +163,9 @@
             </div>
             <div class="d-flex gap-3">
                 <button class="btn btn-white shadow-sm rounded-3"><i class="bi bi-bell"></i></button>
-                <button class="btn btn-emerald bg-success text-white px-4 rounded-3 fw-bold shadow-sm">
+                <a href="${pageContext.request.contextPath}/manager-report" class="btn btn-emerald bg-success text-white px-4 rounded-3 fw-bold shadow-sm">
                     Tạo báo cáo
-                </button>
+                </a>
             </div>
         </div>
 
@@ -168,8 +173,8 @@
             <div class="col-md-4">
                 <div class="card card-stat bg-primary text-white p-4 shadow">
                     <h6>Yêu cầu chờ duyệt</h6>
-                    <h2 class="fw-bold display-6 mb-3">${pendingApprovals != null ? pendingApprovals : 0}</h2>
-                    <a href="approvals" class="text-white text-decoration-none small fw-bold">
+                    <h2 id="pendingApprovalsCount" class="fw-bold display-6 mb-3">${pendingApprovals != null ? pendingApprovals : 0}</h2>
+                    <a href="${pageContext.request.contextPath}/approvals" class="text-white text-decoration-none small fw-bold">
                         Xem danh sách duyệt <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                     <i class="bi bi-clock-history bi-background"></i>
@@ -179,8 +184,8 @@
             <div class="col-md-4">
                 <div class="card card-stat bg-warning text-dark p-4 shadow">
                     <h6>Sách quá hạn chưa trả</h6>
-                    <h2 class="fw-bold display-6 mb-3">${overdueBooks != null ? overdueBooks : 0}</h2>
-                    <a href="penalties" class="text-dark text-decoration-none small fw-bold">
+                    <h2 id="overdueBooksCount" class="fw-bold display-6 mb-3">${overdueBooks != null ? overdueBooks : 0}</h2>
+                    <a href="${pageContext.request.contextPath}/penalties" class="text-dark text-decoration-none small fw-bold">
                         Gửi cảnh báo ngay <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                     <i class="bi bi-exclamation-triangle bi-background"></i>
@@ -190,7 +195,7 @@
             <div class="col-md-4">
                 <div class="card card-stat bg-info text-white p-4 shadow">
                     <h6>Lượt mượn hôm nay</h6>
-                    <h2 class="fw-bold display-6 mb-3">${todayBorrows != null ? todayBorrows : 0}</h2>
+                    <h2 id="todayBorrowsCount" class="fw-bold display-6 mb-3">${todayBorrows != null ? todayBorrows : 0}</h2>
                     <span class="small fw-bold">Tăng 12% so với hôm qua</span>
                     <i class="bi bi-graph-up-arrow bi-background"></i>
                 </div>
@@ -199,7 +204,7 @@
 
         <div class="card task-card shadow-sm">
             <div class="card-header bg-white py-3 border-0">
-                <h5 class="mb-0 fw-bold">Yêu cầu mượn sách mới nhất</h5>
+                <h5 class="mb-0 fw-bold">Yêu cầu chờ duyệt mới nhất</h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -208,30 +213,36 @@
                             <tr>
                                 <th class="ps-4">Thành viên</th>
                                 <th>Tên sách</th>
+                                <th>Loại yêu cầu</th>
                                 <th>Ngày đăng ký</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
-                       <tbody>
+                       <tbody id="latestRequestsBody">
     <c:forEach var="item" items="${latestRequests}">
         <tr>
             <td class="ps-4">
-                <div class="fw-bold text-dark">${item.userName}</div>
-                <small class="text-muted">ID: ${item.userId}</small>
+                <div class="fw-bold text-dark">${item.user.fullName}</div>
+                <small class="text-muted">ID: ${item.user.userCode}</small>
             </td>
-            <td>${item.bookTitle}</td>
+            <td>${item.book.title}</td>
             <td>
-                <fmt:formatDate value="${item.borrowDate}" pattern="dd/MM/yyyy HH:mm" />
+                <c:choose>
+                    <c:when test="${item.status == 'Chờ duyệt trả'}">Trả sách</c:when>
+                    <c:otherwise>Mượn sách</c:otherwise>
+                </c:choose>
             </td>
+            <td>${item.borrowDate}</td>
             <td>
-                <a href="approvals?action=approve&id=${item.id}" class="btn btn-sm btn-success btn-action me-2">Duyệt</a>
-                <a href="approvals?action=reject&id=${item.id}" class="btn btn-sm btn-outline-danger btn-action">Từ chối</a>
+                <a href="${pageContext.request.contextPath}/approvals?action=detail&id=${item.borrowingCode}" class="btn btn-sm btn-outline-secondary btn-action me-2">Chi tiết</a>
+                <a href="${pageContext.request.contextPath}/approvals?action=approve&id=${item.borrowingCode}" class="btn btn-sm btn-success btn-action me-2">Duyệt</a>
+                <a href="${pageContext.request.contextPath}/approvals?action=reject&id=${item.borrowingCode}" class="btn btn-sm btn-outline-danger btn-action">Từ chối</a>
             </td>
         </tr>
     </c:forEach>
     <c:if test="${empty latestRequests}">
         <tr>
-            <td colspan="4" class="text-center py-4 text-muted">Không có yêu cầu nào cần xử lý.</td>
+            <td colspan="5" class="text-center py-4 text-muted">Không có yêu cầu nào cần xử lý.</td>
         </tr>
     </c:if>
 </tbody>
@@ -243,5 +254,104 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function () {
+        const contextPath = '${pageContext.request.contextPath}';
+        const dashboardApi = contextPath + '/manager-dash?ajax=1';
+        const approvalsUrl = contextPath + '/approvals';
+        const pendingEl = document.getElementById('pendingApprovalsCount');
+        const overdueEl = document.getElementById('overdueBooksCount');
+        const todayEl = document.getElementById('todayBorrowsCount');
+        const tbodyEl = document.getElementById('latestRequestsBody');
+        const refreshIntervalMs = 10000;
+        let refreshTimer = null;
+
+        function escapeHtml(raw) {
+            if (raw === null || raw === undefined) {
+                return '';
+            }
+            return String(raw)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+        }
+
+        function renderLatestRequests(items) {
+            if (!Array.isArray(items) || items.length === 0) {
+                tbodyEl.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Không có yêu cầu nào cần xử lý.</td></tr>';
+                return;
+            }
+
+            const rows = items.map(function (item) {
+                const requestType = item.status === 'Chờ duyệt trả' ? 'Trả sách' : 'Mượn sách';
+                const borrowId = Number(item.borrowingCode) || 0;
+
+                return '<tr>'
+                        + '<td class="ps-4"><div class="fw-bold text-dark">' + escapeHtml(item.fullName) + '</div><small class="text-muted">ID: ' + escapeHtml(item.userCode) + '</small></td>'
+                        + '<td>' + escapeHtml(item.bookTitle) + '</td>'
+                        + '<td>' + requestType + '</td>'
+                        + '<td>' + escapeHtml(item.borrowDate) + '</td>'
+                        + '<td>'
+                        + '<a href="' + approvalsUrl + '?action=detail&id=' + borrowId + '" class="btn btn-sm btn-outline-secondary btn-action me-2">Chi tiết</a>'
+                        + '<a href="' + approvalsUrl + '?action=approve&id=' + borrowId + '" class="btn btn-sm btn-success btn-action me-2">Duyệt</a>'
+                        + '<a href="' + approvalsUrl + '?action=reject&id=' + borrowId + '" class="btn btn-sm btn-outline-danger btn-action">Từ chối</a>'
+                        + '</td>'
+                        + '</tr>';
+            });
+
+            tbodyEl.innerHTML = rows.join('');
+        }
+
+        async function refreshDashboardData() {
+            try {
+                const response = await fetch(dashboardApi, {
+                    method: 'GET',
+                    headers: {'Accept': 'application/json'}
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const data = await response.json();
+                pendingEl.textContent = data.pendingApprovals != null ? data.pendingApprovals : 0;
+                overdueEl.textContent = data.overdueBooks != null ? data.overdueBooks : 0;
+                todayEl.textContent = data.todayBorrows != null ? data.todayBorrows : 0;
+                renderLatestRequests(data.latestRequests);
+            } catch (error) {
+                console.error('Không thể cập nhật dữ liệu dashboard theo thời gian thực:', error);
+            }
+        }
+
+        function startRealtimeRefresh() {
+            if (refreshTimer !== null) {
+                return;
+            }
+            refreshDashboardData();
+            refreshTimer = setInterval(refreshDashboardData, refreshIntervalMs);
+        }
+
+        function stopRealtimeRefresh() {
+            if (refreshTimer === null) {
+                return;
+            }
+            clearInterval(refreshTimer);
+            refreshTimer = null;
+        }
+
+        function handleVisibilityChange() {
+            if (document.visibilityState === 'visible') {
+                startRealtimeRefresh();
+            } else {
+                stopRealtimeRefresh();
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        handleVisibilityChange();
+    })();
+</script>
 </body>
 </html>

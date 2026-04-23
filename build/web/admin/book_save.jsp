@@ -59,6 +59,26 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nha xuat ban:</label>
+                        <input type="text" class="form-control" name="publisher" value="${book.publisher}" placeholder="VD: NXB Giao duc">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Gia sach:</label>
+                        <input type="number" step="1000" class="form-control" name="price" value="${book.price}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">So trang:</label>
+                        <input type="number" class="form-control" name="pageCount" value="${book.pageCount}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Vi tri / kho sach:</label>
+                    <input type="text" class="form-control" name="shelfLocation" value="${book.shelfLocation}" placeholder="VD: Ke A1 - Tang 2">
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Chọn ảnh bìa sách:</label>
                     <input type="file" class="form-control" name="image" accept="image/*">

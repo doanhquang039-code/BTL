@@ -59,11 +59,52 @@
                 <div class="mb-4">
                     <label class="form-label">Vai trò quản trị</label>
                     <select name="role" class="form-select border-warning">
-                        <%-- So sánh đúng các giá trị Role để hiển thị màu Badge chính xác --%>
-                        <option value="User" ${user.role == 'user' ? 'selected' : ''}>user (Thành viên)</option>
-                        <option value="Manager" ${user.role == 'manager' ? 'selected' : ''}>manager (Quản lý)</option>
-                        <option value="Admin" ${user.role == 'admin' ? 'selected' : ''}>admin (Quản trị viên)</option>
+                        <option value="User" ${user.role != null && user.role.equalsIgnoreCase('user') ? 'selected' : ''}>user (Thành viên)</option>
+                        <option value="Manager" ${user.role != null && user.role.equalsIgnoreCase('manager') ? 'selected' : ''}>manager (Quản lý)</option>
+                        <option value="Admin" ${user.role != null && user.role.equalsIgnoreCase('admin') ? 'selected' : ''}>admin (Quản trị viên)</option>
                     </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ngày sinh</label>
+                        <input type="date" name="birthDate" class="form-control" value="${user.birthDate}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Chức danh</label>
+                        <input type="text" name="position" class="form-control" value="${user.position}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ</label>
+                    <input type="text" name="address" class="form-control" value="${user.address}">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CMND/CCCD</label>
+                        <input type="text" name="identityNumber" class="form-control" value="${user.identityNumber}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tiền ký gửi</label>
+                        <input type="number" step="1000" name="depositAmount" class="form-control" value="${user.depositAmount}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Ngày cấp thẻ</label>
+                        <input type="date" name="cardIssueDate" class="form-control" value="${user.cardIssueDate}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Ngày hết hạn</label>
+                        <input type="date" name="cardExpiryDate" class="form-control" value="${user.cardExpiryDate}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Số sách được mượn</label>
+                        <input type="number" name="maxBorrowBooks" class="form-control" value="${user.maxBorrowBooks}">
+                    </div>
                 </div>
 
                 <div class="d-flex gap-2">

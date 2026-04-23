@@ -96,7 +96,7 @@
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4 px-2" style="max-width: 850px; margin: auto;">
-        <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="back-link">
+        <a href="${pageContext.request.contextPath}/admin-dashboard" class="back-link">
             <i class="bi bi-arrow-left-circle-fill fs-4 me-2"></i> Quay về trang Admin
         </a>
         <nav aria-label="breadcrumb">

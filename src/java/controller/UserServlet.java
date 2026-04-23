@@ -11,7 +11,9 @@
 package controller;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -24,6 +26,7 @@ import service.impl.UserServiceImpl;
 @WebServlet(name = "UserServlet", urlPatterns = {"/users"})
 public class UserServlet extends HttpServlet {
     private final UserService userService = UserServiceImpl.getInstance();
+    private static final int PAGE_SIZE = 10;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -76,8 +79,42 @@ public class UserServlet extends HttpServlet {
 
     private void displayAll(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<User> list = userService.findAll();
-        request.setAttribute("users", list);
+        String keyword = trimToEmpty(request.getParameter("keyword"));
+        String role = trimToEmpty(request.getParameter("role"));
+        String startsWith = trimToEmpty(request.getParameter("startsWith")).toUpperCase();
+        int page = parseInt(request.getParameter("page"), 1);
+
+        List<User> list = keyword.isEmpty()
+                ? userService.findAll()
+                : userService.searchByName(keyword);
+
+        if (!role.isEmpty()) {
+            list = list.stream()
+                    .filter(u -> u.getRole() != null && u.getRole().equalsIgnoreCase(role))
+                    .collect(Collectors.toList());
+        }
+
+        if (!startsWith.isEmpty()) {
+            list = list.stream()
+                    .filter(u -> u.getFullName() != null && u.getFullName().toUpperCase().startsWith(startsWith))
+                    .collect(Collectors.toList());
+        }
+
+        int totalItems = list.size();
+        int totalPages = Math.max(1, (int) Math.ceil(totalItems / (double) PAGE_SIZE));
+        page = Math.max(1, Math.min(page, totalPages));
+        int fromIndex = (page - 1) * PAGE_SIZE;
+        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalItems);
+        List<User> paged = totalItems == 0 ? List.of() : list.subList(fromIndex, toIndex);
+
+        request.setAttribute("users", paged);
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("role", role);
+        request.setAttribute("startsWith", startsWith);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("pageSize", PAGE_SIZE);
+        request.setAttribute("totalItems", totalItems);
         request.getRequestDispatcher("/admin/user_list.jsp").forward(request, response);
     }
 
@@ -89,6 +126,7 @@ public class UserServlet extends HttpServlet {
             u.setPassword(request.getParameter("password"));
             u.setFullName(request.getParameter("fullName"));
             u.setRole(request.getParameter("role"));
+            fillReaderFields(request, u);
 
             userService.add(u);
             response.sendRedirect("users?msg=success");
@@ -115,6 +153,8 @@ private void updatePost(HttpServletRequest request, HttpServletResponse response
         u.setRole(role);
         u.setPassword(password);
         u.setUsername(username);
+        u.setUserCode(userCode);
+        fillReaderFields(request, u);
 
         // Gọi đúng hàm update(User e, int id) như bạn đã định nghĩa trong Service
         userService.update(u, userCode);
@@ -125,5 +165,42 @@ private void updatePost(HttpServletRequest request, HttpServletResponse response
         e.printStackTrace();
         response.sendRedirect("users?msg=error");
     }
+}
+
+private void fillReaderFields(HttpServletRequest request, User user) {
+    user.setBirthDate(request.getParameter("birthDate"));
+    user.setPosition(request.getParameter("position"));
+    user.setAddress(request.getParameter("address"));
+    user.setIdentityNumber(request.getParameter("identityNumber"));
+    user.setCardIssueDate(request.getParameter("cardIssueDate"));
+    user.setCardExpiryDate(request.getParameter("cardExpiryDate"));
+    user.setDepositAmount(parseBigDecimal(request.getParameter("depositAmount")));
+    user.setMaxBorrowBooks(parseInt(request.getParameter("maxBorrowBooks"), 5));
+}
+
+private BigDecimal parseBigDecimal(String value) {
+    if (value == null || value.trim().isEmpty()) {
+        return BigDecimal.ZERO;
+    }
+    try {
+        return new BigDecimal(value.trim());
+    } catch (NumberFormatException e) {
+        return BigDecimal.ZERO;
+    }
+}
+
+private int parseInt(String value, int defaultValue) {
+    if (value == null || value.trim().isEmpty()) {
+        return defaultValue;
+    }
+    try {
+        return Integer.parseInt(value.trim());
+    } catch (NumberFormatException e) {
+        return defaultValue;
+    }
+}
+
+private String trimToEmpty(String value) {
+    return value == null ? "" : value.trim();
 }
 }

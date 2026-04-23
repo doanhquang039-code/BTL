@@ -1,16 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
+
 import DAO.BookDAO;
 import DAO.CategoryDAO;
 import java.io.File;
-import javax.servlet.annotation.MultipartConfig;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,212 +20,137 @@ import model.Book;
 import model.Category;
 import model.User;
 import service.impl.BookServiceImpl;
-import service.impl.CategoryServiceImpl;
 
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
-    maxFileSize = 1024 * 1024 * 10,      // 10 MB
-    maxRequestSize = 1024 * 1024 * 100   // 100 MB
+    fileSizeThreshold = 1024 * 1024,
+    maxFileSize = 1024 * 1024 * 10,
+    maxRequestSize = 1024 * 1024 * 100
 )
 @WebServlet(name = "BookServlet", urlPatterns = {"/books"})
 public class BookServlet extends HttpServlet {
     private final BookServiceImpl bookService = BookServiceImpl.getInstance();
-    private final CategoryServiceImpl categoryService = CategoryServiceImpl.getInstance();
-private final BookDAO bookDAO = BookDAO.getInstance();
+    private final BookDAO bookDAO = BookDAO.getInstance();
     private final CategoryDAO categoryDAO = CategoryDAO.getInstance();
-    
 
- 
-
-    private void displayAllBooks(HttpServletRequest request, HttpServletResponse response)
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Book> books = bookService.findAll();
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+
+        String action = request.getParameter("action");
+        String keyword = request.getParameter("keyword");
+        User user = currentUser(request);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            displayBooks(request, response, bookDAO.searchByName(keyword));
+            return;
+        }
+        if (action == null) {
+            action = "";
+        }
+
+        switch (action) {
+            case "create":
+                if (!requireAdmin(request, response)) return;
+                request.setAttribute("categories", categoryDAO.findAll());
+                request.getRequestDispatcher("/admin/book_save.jsp").forward(request, response);
+                break;
+            case "update":
+                if (!requireAdmin(request, response)) return;
+                showUpdateForm(request, response);
+                break;
+            case "delete":
+                if (!requireAdmin(request, response)) return;
+                deleteBook(request, response);
+                break;
+            default:
+                if (canManageBooks(user)) {
+                    request.setAttribute("categories", categoryDAO.findAll());
+                    displayBooks(request, response, filterManagedBooks(request, bookService.findAll()));
+                } else {
+                    displayBooks(request, response, bookService.findAll());
+                }
+                break;
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+
+        String action = request.getParameter("action");
+        if ("search".equals(action)) {
+            searchBooks(request, response);
+        } else if ("create".equals(action)) {
+            if (!requireAdmin(request, response)) return;
+            saveBook(request, response, true);
+        } else if ("update".equals(action)) {
+            if (!requireAdmin(request, response)) return;
+            saveBook(request, response, false);
+        } else {
+            displayBooks(request, response, bookService.findAll());
+        }
+    }
+
+    private void displayBooks(HttpServletRequest request, HttpServletResponse response, List<Book> books)
+            throws ServletException, IOException {
         request.setAttribute("books", books);
-        request.getRequestDispatcher("/admin/book_list.jsp").forward(request, response);
-        // Trong BookServlet.java hàm doGet hoặc displayAll
-User user = (User) request.getSession().getAttribute("userSession");
-if (user.getRole().equals("admin")) {
-    request.getRequestDispatcher("/admin/book_list.jsp").forward(request, response);
-} else {
-    request.getRequestDispatcher("/user/book_list.jsp").forward(request, response);
-}
+        if (canManageBooks(currentUser(request))) {
+            request.getRequestDispatcher("/admin/book_list.jsp").forward(request, response);
+        } else {
+            request.getRequestDispatcher("/user/book_list.jsp").forward(request, response);
+        }
     }
 
-    private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
+    private void showUpdateForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Cần lấy list categories để user chọn khi thêm sách mới
-        List<Category> categories = categoryService.findAll();
-        request.setAttribute("categories", categories);
-        request.getRequestDispatcher("/admin/book_form.jsp").forward(request, response);
-    }
-
-    private void createBook(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        String title = request.getParameter("title");
-        String author = request.getParameter("author");
-        int categoryId = Integer.parseInt(request.getParameter("categoryCode"));
-        String year = request.getParameter("publishYear");
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
-
-        Book book = new Book();
-        book.setTitle(title);
-        book.setAuthor(author);
-        book.setPublishYear(year);
-        book.setQuantity(quantity);
-        
-        Category cat = new Category();
-        cat.setCategoryCode(categoryId);
-        book.setCategory(cat);
-
-        bookService.add(book);
-        response.sendRedirect(request.getContextPath() + "/books");
+        int id = Integer.parseInt(request.getParameter("id"));
+        request.setAttribute("book", bookDAO.findById(id));
+        request.setAttribute("categories", categoryDAO.findAll());
+        request.getRequestDispatcher("/admin/book_save.jsp").forward(request, response);
     }
 
     private void deleteBook(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        bookService.delete(id);
-        response.sendRedirect(request.getContextPath() + "/books");
-    }
-    
-    // updatePost và updateGet làm tương tự như CategoryServlet của bạn...
-// 1. Hàm hiển thị form chỉnh sửa (GET)
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        try {
-            int id = Integer.parseInt(request.getParameter("id"));
-            Book existingBook = bookDAO.findById(id); // Lấy thông tin sách hiện tại
-            List<Category> categories = categoryDAO.findAll(); // Lấy list danh mục để chọn lại
-
-            request.setAttribute("book", existingBook);
-            request.setAttribute("categories", categories);
-            
-            // Forward tới trang save.jsp (dùng chung cho cả thêm và sửa)
-            request.getRequestDispatcher("/admin/book_save.jsp").forward(request, response);
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/books");
+        bookDAO.delete(id);
+        boolean deleted = bookDAO.findById(id) == null;
+        if (deleted) {
+            response.sendRedirect(request.getContextPath() + "/books?msg=deleted");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/books?msg=deleteFailed");
         }
     }
 
-    // 2. Hàm xử lý cập nhật sách (POST)
-    private void updateBook(HttpServletRequest request, HttpServletResponse response) 
+    private void searchBooks(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        String title = request.getParameter("title");
-        String author = request.getParameter("author");
-        int categoryCode = Integer.parseInt(request.getParameter("categoryCode"));
-        String publishYear = request.getParameter("publishYear");
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        String keyword = request.getParameter("name");
+        displayBooks(request, response, bookDAO.searchByName(keyword));
+    }
 
-        // Xử lý ảnh:
-        Part filePart = request.getPart("image");
-        String imagePath = saveImage(filePart);
-
-        // LOGIC QUAN TRỌNG: Nếu người dùng không chọn ảnh mới khi sửa, 
-        // ta lấy lại đường dẫn ảnh cũ từ input hidden 'oldImage'
-        if (imagePath == null || imagePath.isEmpty()) {
-            imagePath = request.getParameter("oldImage");
-        }
-
+    private void saveBook(HttpServletRequest request, HttpServletResponse response, boolean isCreate)
+            throws ServletException, IOException {
         Book book = new Book();
-        book.setTitle(title);
-        book.setAuthor(author);
-        book.setPublishYear(publishYear);
-        book.setQuantity(quantity);
-        book.setImage(imagePath); // imagePath bây giờ chắc chắn không null
-        
-        Category cat = new Category();
-        cat.setCategoryCode(categoryCode);
-        book.setCategory(cat);
+        book.setTitle(request.getParameter("title"));
+        book.setAuthor(request.getParameter("author"));
+        book.setPublisher(request.getParameter("publisher"));
+        book.setPublishYear(request.getParameter("publishYear"));
+        book.setPrice(parseBigDecimal(request.getParameter("price")));
+        book.setPageCount(parseInt(request.getParameter("pageCount")));
+        book.setShelfLocation(request.getParameter("shelfLocation"));
+        book.setQuantity(Integer.parseInt(request.getParameter("quantity")));
 
-        bookDAO.update(book, id);
-        response.sendRedirect(request.getContextPath() + "/books");
-    }
+        Category category = new Category();
+        category.setCategoryCode(Integer.parseInt(request.getParameter("categoryCode")));
+        book.setCategory(category);
 
-    // 3. Hàm tìm kiếm sách (POST)
-    private void searchBooks(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        String keyword = request.getParameter("name"); // Tên từ ô input search
-        List<Book> foundBooks = bookDAO.searchByName(keyword);
-        
-        request.setAttribute("books", foundBooks);
-        // Sau khi tìm xong, hiển thị kết quả trên chính trang list.jsp
-        request.getRequestDispatcher("/admin/book_list.jsp").forward(request, response);
-    }
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String action = request.getParameter("action");
-        if (action == null) action = "";
-
-        switch (action) {
-            case "create":
-                request.setAttribute("categories", categoryDAO.findAll());
-                request.getRequestDispatcher("/admin/book_save.jsp").forward(request, response);
-                break;
-            case "update":
-                int id = Integer.parseInt(request.getParameter("id"));
-                request.setAttribute("book", bookDAO.findById(id));
-                request.setAttribute("categories", categoryDAO.findAll());
-                request.getRequestDispatcher("/admin/book_save.jsp").forward(request, response);
-                break;
-            case "delete":
-                int delId = Integer.parseInt(request.getParameter("id"));
-                bookDAO.delete(delId);
-                response.sendRedirect(request.getContextPath() + "/books");
-                break;
-            default:
-              List<Book> allBooks = bookDAO.findAll();
-            request.setAttribute("books", allBooks); 
-            request.getRequestDispatcher("/admin/book_list.jsp").forward(request, response);
-            break;
-        }
-    }
-
-   @Override
-protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    request.setCharacterEncoding("UTF-8");
-    String action = request.getParameter("action");
-
-    if ("search".equals(action)) {
-        // Nút tìm kiếm chỉ hoạt động khi bạn nhấn SUBMIT form
-        searchBooks(request, response); 
-    } else if ("create".equals(action)) {
-        processAddOrUpdate(request, response, true);
-    } else if ("update".equals(action)) {
-        processAddOrUpdate(request, response, false);
-    }
-}
-
-    private void processAddOrUpdate(HttpServletRequest request, HttpServletResponse response, boolean isCreate) 
-            throws ServletException, IOException {
-        
-        String title = request.getParameter("title");
-        String author = request.getParameter("author");
-        int categoryCode = Integer.parseInt(request.getParameter("categoryCode"));
-        String publishYear = request.getParameter("publishYear");
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
-
-        // Xử lý upload ảnh
-        Part filePart = request.getPart("image");
-        String imagePath = saveImage(filePart);
-
-        // Nếu là update và không chọn ảnh mới, giữ lại ảnh cũ
+        String imagePath = saveImage(request.getPart("image"));
         if (!isCreate && (imagePath == null || imagePath.isEmpty())) {
             imagePath = request.getParameter("oldImage");
         }
-
-        Book book = new Book();
-        book.setTitle(title);
-        book.setAuthor(author);
-        book.setPublishYear(publishYear);
-        book.setQuantity(quantity);
         book.setImage(imagePath);
-        
-        Category cat = new Category();
-        cat.setCategoryCode(categoryCode);
-        book.setCategory(cat);
 
         if (isCreate) {
             bookDAO.add(book);
@@ -238,22 +163,127 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
     }
 
     private String saveImage(Part imagePart) throws IOException {
-        if (imagePart == null || imagePart.getSubmittedFileName().isEmpty()) {
+        if (imagePart == null || imagePart.getSubmittedFileName() == null || imagePart.getSubmittedFileName().isEmpty()) {
             return null;
         }
-        // Tạo thư mục uploads trong thư mục build của server
-        String uploadDir = getServletContext().getRealPath("/") + "uploads" + File.separator;
+
+        String uploadDir = getServletContext().getRealPath("/uploads");
+        if (uploadDir == null || uploadDir.trim().isEmpty()) {
+            uploadDir = getServletContext().getRealPath("/") + "uploads";
+        }
+        if (uploadDir == null || uploadDir.trim().isEmpty()) {
+            return null;
+        }
+        if (!uploadDir.endsWith(File.separator)) {
+            uploadDir += File.separator;
+        }
         File uploadFolder = new File(uploadDir);
         if (!uploadFolder.exists()) {
             uploadFolder.mkdirs();
         }
 
         String fileName = Path.of(imagePart.getSubmittedFileName()).getFileName().toString();
-        // Đổi tên file để tránh trùng lặp (tùy chọn)
         fileName = System.currentTimeMillis() + "_" + fileName;
-        
+
         imagePart.write(uploadDir + fileName);
-        return "uploads/" + fileName; 
+        return "uploads/" + fileName;
     }
 
+    private User currentUser(HttpServletRequest request) {
+        return (User) request.getSession().getAttribute("userSession");
+    }
+
+    private boolean canManageBooks(User user) {
+        return user != null
+                && ("admin".equalsIgnoreCase(user.getRole())
+                || "manager".equalsIgnoreCase(user.getRole()));
+    }
+
+    private boolean requireAdmin(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        if (canManageBooks(currentUser(request))) {
+            return true;
+        }
+        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        return false;
+    }
+
+    private BigDecimal parseBigDecimal(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            return new BigDecimal(value.trim());
+        } catch (NumberFormatException e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private int parseInt(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private Integer parseIntegerOrNull(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private List<Book> filterManagedBooks(HttpServletRequest request, List<Book> books) {
+        String filterKeyword = trim(request.getParameter("filterKeyword")).toLowerCase();
+        Integer minQty = parseIntegerOrNull(request.getParameter("minQty"));
+        Integer maxQty = parseIntegerOrNull(request.getParameter("maxQty"));
+        String stockStatus = trim(request.getParameter("stockStatus"));
+        Integer categoryCode = parseIntegerOrNull(request.getParameter("categoryCode"));
+        String qtySort = trim(request.getParameter("qtySort"));
+
+        request.setAttribute("filterKeyword", request.getParameter("filterKeyword"));
+        request.setAttribute("minQty", request.getParameter("minQty"));
+        request.setAttribute("maxQty", request.getParameter("maxQty"));
+        request.setAttribute("stockStatus", stockStatus);
+        request.setAttribute("categoryCode", request.getParameter("categoryCode"));
+        request.setAttribute("qtySort", qtySort);
+
+        List<Book> filtered = books.stream()
+                .filter(book -> filterKeyword.isEmpty()
+                        || containsIgnoreCase(book.getTitle(), filterKeyword)
+                        || containsIgnoreCase(book.getAuthor(), filterKeyword)
+                        || containsIgnoreCase(book.getPublisher(), filterKeyword)
+                        || containsIgnoreCase(book.getPublishYear(), filterKeyword)
+                        || (book.getCategory() != null && containsIgnoreCase(book.getCategory().getName(), filterKeyword)))
+                .filter(book -> categoryCode == null
+                        || (book.getCategory() != null && book.getCategory().getCategoryCode() == categoryCode))
+                .filter(book -> minQty == null || book.getQuantity() >= minQty)
+                .filter(book -> maxQty == null || book.getQuantity() <= maxQty)
+                .filter(book -> !"inStock".equalsIgnoreCase(stockStatus) || book.getQuantity() > 0)
+                .filter(book -> !"outOfStock".equalsIgnoreCase(stockStatus) || book.getQuantity() <= 0)
+                .collect(Collectors.toList());
+
+        if ("asc".equalsIgnoreCase(qtySort)) {
+            filtered.sort(Comparator.comparingInt(Book::getQuantity));
+        } else if ("desc".equalsIgnoreCase(qtySort)) {
+            filtered.sort(Comparator.comparingInt(Book::getQuantity).reversed());
+        }
+        return filtered;
+    }
+
+    private String trim(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private boolean containsIgnoreCase(String source, String keyword) {
+        return source != null && source.toLowerCase().contains(keyword);
+    }
 }

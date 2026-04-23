@@ -82,15 +82,16 @@ public class BookImportDAO {
     }
     // 1. Thêm mới phiếu nhập kho
 public void addImport(BookImport bi) {
-    String sql = "INSERT INTO book_imports (book_code, import_quantity, import_date, imported_by) VALUES (?, ?, ?, ?)";
+    String sql = "INSERT INTO book_imports (import_id, book_code, import_quantity, import_date, imported_by) VALUES (?, ?, ?, ?, ?)";
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, bi.getBook().getBookCode());
-        ps.setInt(2, bi.getImportQuantity());
+        ps.setInt(1, nextId("book_imports", "import_id"));
+        ps.setInt(2, bi.getBook().getBookCode());
+        ps.setInt(3, bi.getImportQuantity());
         
         // DÙNG setTimestamp để lưu cả Giờ:Phút:Giây
-        ps.setTimestamp(3, bi.getImportDate()); 
+        ps.setTimestamp(4, bi.getImportDate()); 
         
-        ps.setString(4, bi.getImportedBy());
+        ps.setString(5, bi.getImportedBy());
         ps.executeUpdate();
     } catch (SQLException e) { e.printStackTrace(); }
 }
@@ -128,5 +129,18 @@ public int countImportsThisMonth() {
         e.printStackTrace();
     }
     return 0;
+}
+
+private int nextId(String tableName, String idColumn) {
+    String sql = "SELECT COALESCE(MAX(" + idColumn + "), 0) + 1 FROM " + tableName;
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 1;
 }
 }

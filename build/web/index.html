@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
--->
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -41,7 +36,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow">
         <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="index.jsp">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
                 <i class="bi bi-book-half me-2"></i>LIBRARY PRO
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -49,9 +44,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-link"><a class="nav-link active" href="index.jsp">Trang chủ</a></li>
+                    <li class="nav-link"><a class="nav-link active" href="index.html">Trang chủ</a></li>
                     <li class="nav-link"><a class="nav-link" href="books">Sách</a></li>
-                    <li class="nav-link"><a class="nav-link" href="borrow-public">Mượn sách</a></li>
+                    <li class="nav-link"><a class="nav-link" href="books">Mượn sách</a></li>
                 </ul>
                 <div class="d-flex gap-2">
                     <a href="login.jsp" class="btn btn-outline-light btn-login">Đăng nhập</a>
@@ -96,7 +91,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                     <div class="display-4 text-success mb-3"><i class="bi bi-clipboard-check"></i></div>
                     <h4 class="fw-bold">Phiếu Mượn Trực Tuyến</h4>
                     <p class="text-muted">Theo dõi lịch sử mượn trả, gia hạn sách và kiểm tra tình trạng sách hiện tại.</p>
-                    <a href="borrow-public" class="btn btn-link text-decoration-none text-success">Xem danh sách <i class="bi bi-arrow-right"></i></a>
+                    <a href="books" class="btn btn-link text-decoration-none text-success">Xem danh sách <i class="bi bi-arrow-right"></i></a>
                 </div>
             </div>
 
@@ -113,7 +108,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
 
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container text-center">
-            <p class="mb-0">&copy; 2026 Library Pro System. Phát triển bởi <span class="text-primary">admoi</span>.</p>
+            <p class="mb-0">&copy; 2026. Phát triển bởi <span class="text-primary">Các thành viên nhóm</span>.</p>
             <div class="mt-2">
                 <a href="#" class="text-white me-3"><i class="bi bi-facebook"></i></a>
                 <a href="#" class="text-white me-3"><i class="bi bi-github"></i></a>

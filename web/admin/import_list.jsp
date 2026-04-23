@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -90,13 +91,44 @@
                 <small class="text-white-50 text-uppercase" style="letter-spacing: 1px;">Theo dõi luồng hàng hóa nhập vào</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn btn-outline-light border-0 shadow-none">
+                <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-outline-light border-0 shadow-none">
                     <i class="bi bi-house-door fs-5"></i>
                 </a>
                 <a href="imports?action=create" class="btn btn-light fw-bold px-4 shadow-sm text-primary">
                     <i class="bi bi-plus-lg me-1"></i> NHẬP MỚI
                 </a>
             </div>
+        </div>
+
+        <div class="card-body p-3">
+            <form action="imports" method="get" class="row g-2 mb-3">
+                <div class="col-md-3">
+                    <input type="text" name="keyword" class="form-control" placeholder="Tìm theo mã phiếu, mã sách, tên sách, nhân viên..." value="${keyword}">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" name="importedBy" class="form-control" placeholder="Nhân viên nhập" value="${importedBy}">
+                </div>
+                <div class="col-md-1">
+                    <select name="startsWith" class="form-select">
+                        <option value="">A-Z</option>
+                        <c:forEach var="ch" items="${fn:split('A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z', ',')}">
+                            <option value="${ch}" ${startsWith == ch ? 'selected' : ''}>${ch}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="fromDate" class="form-control" value="${fromDate}">
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="toDate" class="form-control" value="${toDate}">
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-outline-primary w-100" type="submit">Lọc</button>
+                </div>
+                <div class="col-md-1">
+                    <a href="imports" class="btn btn-outline-secondary w-100">Xóa</a>
+                </div>
+            </form>
         </div>
 
         <div class="card-body p-0">
@@ -165,6 +197,25 @@
                         </c:if>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center px-3 py-3">
+                <small class="text-muted">Tổng: ${totalItems} bản ghi</small>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="imports?keyword=${keyword}&importedBy=${importedBy}&startsWith=${startsWith}&fromDate=${fromDate}&toDate=${toDate}&page=${currentPage - 1}">Trước</a>
+                        </li>
+                        <c:forEach begin="1" end="${totalPages}" var="p">
+                            <li class="page-item ${p == currentPage ? 'active' : ''}">
+                                <a class="page-link" href="imports?keyword=${keyword}&importedBy=${importedBy}&startsWith=${startsWith}&fromDate=${fromDate}&toDate=${toDate}&page=${p}">${p}</a>
+                            </li>
+                        </c:forEach>
+                        <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+                            <a class="page-link" href="imports?keyword=${keyword}&importedBy=${importedBy}&startsWith=${startsWith}&fromDate=${fromDate}&toDate=${toDate}&page=${currentPage + 1}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

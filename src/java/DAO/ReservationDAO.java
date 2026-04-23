@@ -26,16 +26,51 @@ public class ReservationDAO {
     }
 
     // 1. Thêm mới phiếu đặt trước
-    public void createReservation(Reservation res) {
-        String sql = "INSERT INTO Reservations (user_code, book_code, reserve_date, status, is_notified) VALUES (?, ?, ?, ?, ?)";
+    public boolean createReservation(Reservation res) {
+        String sql = "INSERT INTO Reservations (reservationcode, user_code, book_code, reserve_date, status, is_notified) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, res.getUser().getUserCode());
-            ps.setInt(2, res.getBook().getBookCode());
-            ps.setString(3, res.getReserveDate());
-            ps.setString(4, res.getStatus() != null ? res.getStatus() : "Đang chờ");
-            ps.setBoolean(5, res.isNotified());
-            ps.executeUpdate();
-        } catch (SQLException e) { e.printStackTrace(); }
+            ps.setInt(1, nextId("Reservations", "reservationcode"));
+            ps.setInt(2, res.getUser().getUserCode());
+            ps.setInt(3, res.getBook().getBookCode());
+            ps.setString(4, res.getReserveDate());
+            ps.setString(5, res.getStatus() != null ? res.getStatus() : "Đang chờ");
+            ps.setBoolean(6, res.isNotified());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean existsPendingReservation(int userCode, int bookCode) {
+        String sql = "SELECT 1 FROM Reservations WHERE user_code = ? AND book_code = ? AND status = ? LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userCode);
+            ps.setInt(2, bookCode);
+            ps.setString(3, "Đang chờ");
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean existsPendingReservationExcluding(int userCode, int bookCode, int reservationCode) {
+        String sql = "SELECT 1 FROM Reservations WHERE user_code = ? AND book_code = ? AND status = ? AND reservationcode <> ? LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userCode);
+            ps.setInt(2, bookCode);
+            ps.setString(3, "Đang chờ");
+            ps.setInt(4, reservationCode);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     // 2. Hiển thị tất cả danh sách (JOIN để lấy tên User và tiêu đề sách)
@@ -45,7 +80,7 @@ public class ReservationDAO {
                      "FROM Reservations r " +
                      "JOIN Users u ON r.user_code = u.usercode " +
                      "JOIN Books b ON r.book_code = b.bookcode " +
-                     "ORDER BY r.reserve_date ASC";
+                     "ORDER BY r.reserve_date DESC, r.reservationcode DESC";
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -118,7 +153,7 @@ public class ReservationDAO {
         return res;
     }
     public int countPendingReservations() {
-    String sql = "SELECT COUNT(*) FROM Reservations WHERE status = 'Pending'";
+    String sql = "SELECT COUNT(*) FROM Reservations WHERE status = 'Đang chờ'";
     try (PreparedStatement ps = connection.prepareStatement(sql);
          ResultSet rs = ps.executeQuery()) {
         if (rs.next()) {
@@ -129,4 +164,17 @@ public class ReservationDAO {
     }
     return 0;
 }
+
+    private int nextId(String tableName, String idColumn) {
+        String sql = "SELECT COALESCE(MAX(" + idColumn + "), 0) + 1 FROM " + tableName;
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
 }

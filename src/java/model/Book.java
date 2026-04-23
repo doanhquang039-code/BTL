@@ -1,15 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
+
+import java.math.BigDecimal;
 
 public class Book {
     private int bookCode;
     private String title;
     private String author;
-    private Category category; // Liên kết trực tiếp đến đối tượng Category
+    private Category category;
+    private String publisher;
     private String publishYear;
+    private BigDecimal price;
+    private int pageCount;
+    private String shelfLocation;
     private int quantity;
     private String image;
     private int totalImported;
@@ -27,68 +29,39 @@ public class Book {
         this.totalImported = totalImported;
     }
 
-    public int getBookCode() {
-        return bookCode;
-    }
+    public int getBookCode() { return bookCode; }
+    public void setBookCode(int bookCode) { this.bookCode = bookCode; }
 
-    public void setBookCode(int bookCode) {
-        this.bookCode = bookCode;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 
-    public String getAuthor() {
-        return author;
-    }
+    public String getPublisher() { return publisher; }
+    public void setPublisher(String publisher) { this.publisher = publisher; }
 
-    public void setAuthor(String author) {
-        this.author = author;
-    }
+    public String getPublishYear() { return publishYear; }
+    public void setPublishYear(String publishYear) { this.publishYear = publishYear; }
 
-    public Category getCategory() {
-        return category;
-    }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
-    public void setCategory(Category category) {
-        this.category = category;
-    }
+    public int getPageCount() { return pageCount; }
+    public void setPageCount(int pageCount) { this.pageCount = pageCount; }
 
-    public String getPublishYear() {
-        return publishYear;
-    }
+    public String getShelfLocation() { return shelfLocation; }
+    public void setShelfLocation(String shelfLocation) { this.shelfLocation = shelfLocation; }
 
-    public void setPublishYear(String publishYear) {
-        this.publishYear = publishYear;
-    }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public int getQuantity() {
-        return quantity;
-    }
+    public String getImage() { return image; }
+    public void setImage(String image) { this.image = image; }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public int getTotalImported() {
-        return totalImported;
-    }
-
-    public void setTotalImported(int totalImported) {
-        this.totalImported = totalImported;
-    }
-
+    public int getTotalImported() { return totalImported; }
+    public void setTotalImported(int totalImported) { this.totalImported = totalImported; }
 }

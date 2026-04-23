@@ -52,6 +52,48 @@
                     </select>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Ngày sinh</label>
+                        <input type="date" name="birthDate" class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Chức danh</label>
+                        <input type="text" name="position" class="form-control" placeholder="Sinh viên, giáo viên...">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Địa chỉ</label>
+                    <input type="text" name="address" class="form-control">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">CMND/CCCD</label>
+                        <input type="text" name="identityNumber" class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Tiền ký gửi</label>
+                        <input type="number" step="1000" name="depositAmount" class="form-control" value="0">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Ngày cấp thẻ</label>
+                        <input type="date" name="cardIssueDate" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Ngày hết hạn</label>
+                        <input type="date" name="cardExpiryDate" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Số sách được mượn</label>
+                        <input type="number" name="maxBorrowBooks" class="form-control" value="5">
+                    </div>
+                </div>
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100 fw-bold py-2">LƯU THÀNH VIÊN</button>
                     <a href="users" class="btn btn-outline-secondary w-100 fw-bold py-2">HỦY BỎ</a>

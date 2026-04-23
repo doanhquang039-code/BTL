@@ -1,98 +1,100 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DAO;
 
-import model.Penalty;
-import model.User;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import model.Borrowing;
-import model.Borrowing;
+import model.Penalty;
+import model.User;
+
 public class PenaltyDAO {
     private Connection connection;
     private static PenaltyDAO instance;
 
     private PenaltyDAO() {
-        try { connection = MyConnection.getInstance(); } 
-        catch (SQLException e) { e.printStackTrace(); }
+        try {
+            connection = MyConnection.getInstance();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static PenaltyDAO getInstance() {
-        if (instance == null) instance = new PenaltyDAO();
+        if (instance == null) {
+            instance = new PenaltyDAO();
+        }
         return instance;
     }
 
-    // 1. Tạo phiếu phạt mới (Dùng khi trả sách muộn hoặc làm hỏng sách)
-    public void createPenalty(Penalty p) {
-        String sql = "INSERT INTO Penalties (user_code, amount, reason, status) VALUES (?, ?, ?, ?)";
+    public void createPenalty(Penalty penalty) {
+        String sql = "INSERT INTO Penalties (penaltiecode, user_code, borrowing_code, amount, reason, status) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, p.getUser().getUserCode());
-            ps.setBigDecimal(2, p.getAmount());
-            ps.setString(3, p.getReason());
-            ps.setString(4, "Chưa thanh toán"); // Mặc định khi tạo mới
+            ps.setInt(1, nextId("Penalties", "penaltiecode"));
+            ps.setInt(2, penalty.getUser().getUserCode());
+            setBorrowingCode(ps, 3, penalty);
+            ps.setBigDecimal(4, penalty.getAmount());
+            ps.setString(5, penalty.getReason());
+            ps.setString(6, penalty.getStatus());
             ps.executeUpdate();
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-  public List<Penalty> findAll() {
-    List<Penalty> list = new ArrayList<>();
-    // Sử dụng LEFT JOIN để đảm bảo bản ghi phạt không bị mất khi JOIN lỗi
-    String sql = "SELECT p.*, u.fullname, b.borrowingcode " +
-                 "FROM penalties p " +
-                 "LEFT JOIN users u ON p.user_code = u.usercode " +
-                 "LEFT JOIN borrowings b ON p.borrowing_code = b.borrowingcode " +
-                 "ORDER BY p.penaltiecode DESC";
-    try (PreparedStatement ps = connection.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-        while (rs.next()) {
-            list.add(mapPenalty(rs));
+    public List<Penalty> findAll() {
+        List<Penalty> list = new ArrayList<>();
+        String sql = "SELECT p.*, u.fullname, b.borrowingcode " +
+                "FROM Penalties p " +
+                "LEFT JOIN Users u ON p.user_code = u.usercode " +
+                "LEFT JOIN Borrowings b ON p.borrowing_code = b.borrowingcode " +
+                "ORDER BY p.penaltiecode DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapPenalty(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) { e.printStackTrace(); }
-    return list;
-}
-public void update(Penalty p) {
-    String sql = "UPDATE Penalties SET user_code = ?, borrowing_code = ?, " +
-                 "amount = ?, reason = ?, status = ? " +
-                 "WHERE penaltiecode = ?"; 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, p.getUser().getUserCode());
-        
-        // Nếu không có mã phiếu mượn (bằng 0), gán NULL vào DB
-        if (p.getBorrowing().getBorrowingCode() <= 0) {
-            ps.setNull(2, java.sql.Types.INTEGER);
-        } else {
-            ps.setInt(2, p.getBorrowing().getBorrowingCode());
-        }
-        
-        ps.setBigDecimal(3, p.getAmount());
-        ps.setString(4, p.getReason());
-        ps.setString(5, p.getStatus());
-        ps.setInt(6, p.getPenaltyCode());
-        
-        int rowsAffected = ps.executeUpdate();
-        System.out.println("DEBUG DAO: Ket qua Update ID " + p.getPenaltyCode() + " -> Rows: " + rowsAffected);
-    } catch (SQLException e) { 
-        e.printStackTrace(); 
+        return list;
     }
-}
-public void delete(int penaltyCode) {
-    String sql = "DELETE FROM Penalties WHERE penaltiecode = ?"; // Phải là penaltiecode
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, penaltyCode);
-        ps.executeUpdate();
-    } catch (SQLException e) { e.printStackTrace(); }
-}
 
-// Hàm update giữ nguyên như bạn viết là đã đúng (nhưng nhớ Clean & Build)
+    public void update(Penalty penalty) {
+        String sql = "UPDATE Penalties SET user_code = ?, borrowing_code = ?, amount = ?, reason = ?, status = ? WHERE penaltiecode = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, penalty.getUser().getUserCode());
+            setBorrowingCode(ps, 2, penalty);
+            ps.setBigDecimal(3, penalty.getAmount());
+            ps.setString(4, penalty.getReason());
+            ps.setString(5, penalty.getStatus());
+            ps.setInt(6, penalty.getPenaltyCode());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-    // Hàm tìm theo UserID (Bạn đã viết, mình tối ưu lại bằng hàm map)
+    public void delete(int penaltyCode) {
+        String sql = "DELETE FROM Penalties WHERE penaltiecode = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, penaltyCode);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public List<Penalty> findByUserId(int userId) {
         List<Penalty> list = new ArrayList<>();
-        String sql = "SELECT p.*, u.fullname FROM Penalties p " +
-                     "JOIN Users u ON p.user_code = u.usercode WHERE p.user_code = ?";
+        String sql = "SELECT p.*, u.fullname, b.borrowingcode " +
+                "FROM Penalties p " +
+                "JOIN Users u ON p.user_code = u.usercode " +
+                "LEFT JOIN Borrowings b ON p.borrowing_code = b.borrowingcode " +
+                "WHERE p.user_code = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -100,65 +102,94 @@ public void delete(int penaltyCode) {
                     list.add(mapPenalty(rs));
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
-    // Hàm hỗ trợ map dữ liệu để tránh lặp code
-  private Penalty mapPenalty(ResultSet rs) throws SQLException {
-    Penalty p = new Penalty();
-    p.setPenaltyCode(rs.getInt("penaltiecode")); // Khớp với penaltiecode trong DB
-    
-    User u = new User();
-    u.setUserCode(rs.getInt("user_code"));
-    u.setFullName(rs.getString("fullname")); // Lấy từ JOIN
-    p.setUser(u);
-    
-    // Xử lý đối tượng Borrowing
-    Borrowing br = new Borrowing(); 
-    br.setBorrowingCode(rs.getInt("borrowing_code")); // Khớp với cột borrowing_code
-    p.setBorrowing(br);
-    
-    p.setAmount(rs.getBigDecimal("amount"));
-    p.setReason(rs.getString("reason"));
-    p.setStatus(rs.getString("status"));
-    return p;
-}
-
     public Penalty findById(int id) {
-    String sql = "SELECT p.*, u.fullname, b.borrowingcode " +
-                 "FROM penalties p " +
-                 "LEFT JOIN users u ON p.user_code = u.usercode " +
-                 "LEFT JOIN borrowings b ON p.borrowing_code = b.borrowingcode " +
-                 "WHERE p.penaltiecode = ?";
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, id);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return mapPenalty(rs);
+        String sql = "SELECT p.*, u.fullname, b.borrowingcode " +
+                "FROM Penalties p " +
+                "LEFT JOIN Users u ON p.user_code = u.usercode " +
+                "LEFT JOIN Borrowings b ON p.borrowing_code = b.borrowingcode " +
+                "WHERE p.penaltiecode = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapPenalty(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) { e.printStackTrace(); }
-    return null;
-}
-    public int countActivePenalties() {
-    // Giả sử bạn có cột status: 0 là chưa xử lý, 1 là đã xử lý
-    String sql = "SELECT COUNT(*) FROM Penalties WHERE status = 0";
-    try (PreparedStatement ps = connection.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) {
-            return rs.getInt(1);
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return null;
     }
-    return 0;
-}
+
+    public int countActivePenalties() {
+        String sql = "SELECT COUNT(*) FROM Penalties WHERE status IS NULL OR status <> 'Da thanh toan'";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public int countOverdueBooks() {
-    // Đếm các bản ghi có ngày trả dự kiến nhỏ hơn ngày hiện tại và chưa trả
-    String sql = "SELECT COUNT(*) FROM borrows WHERE due_date < CURRENT_DATE AND return_date IS NULL";
-    try (PreparedStatement ps = connection.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) return rs.getInt(1);
-    } catch (SQLException e) { e.printStackTrace(); }
-    return 0;
-}
+        String sql = "SELECT COUNT(*) FROM Borrowings WHERE due_date < CURRENT_DATE AND return_date IS NULL";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private void setBorrowingCode(PreparedStatement ps, int index, Penalty penalty) throws SQLException {
+        if (penalty.getBorrowing() == null || penalty.getBorrowing().getBorrowingCode() <= 0) {
+            ps.setNull(index, Types.INTEGER);
+        } else {
+            ps.setInt(index, penalty.getBorrowing().getBorrowingCode());
+        }
+    }
+
+    private Penalty mapPenalty(ResultSet rs) throws SQLException {
+        Penalty penalty = new Penalty();
+        penalty.setPenaltyCode(rs.getInt("penaltiecode"));
+
+        User user = new User();
+        user.setUserCode(rs.getInt("user_code"));
+        user.setFullName(rs.getString("fullname"));
+        penalty.setUser(user);
+
+        Borrowing borrowing = new Borrowing();
+        borrowing.setBorrowingCode(rs.getInt("borrowing_code"));
+        penalty.setBorrowing(borrowing);
+
+        penalty.setAmount(rs.getBigDecimal("amount"));
+        penalty.setReason(rs.getString("reason"));
+        penalty.setStatus(rs.getString("status"));
+        return penalty;
+    }
+
+    private int nextId(String tableName, String idColumn) {
+        String sql = "SELECT COALESCE(MAX(" + idColumn + "), 0) + 1 FROM " + tableName;
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
 }

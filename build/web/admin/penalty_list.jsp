@@ -5,102 +5,134 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý vi phạm | Admin</title>
+    <title>Danh sách vi phạm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Inter', system-ui, sans-serif; }
-        
+        body {
+            background: #f6f7f9;
+            color: #1f2937;
+            font-family: "Segoe UI", system-ui, sans-serif;
+        }
+
         .main-card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
             overflow: hidden;
         }
 
-        .header-red {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            padding: 1.5rem 2rem;
+        .page-header {
+            background: #374151;
+            padding: 20px 24px;
         }
 
-        /* Styling Table */
+        .page-header h4 {
+            letter-spacing: 0;
+        }
+
+        .toolbar-btn {
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
         .table thead th {
-            background-color: #fdfdfd;
-            color: #e74c3c;
+            background: #f9fafb;
+            color: #4b5563;
+            border-bottom: 1px solid #e5e7eb;
             font-size: 0.8rem;
+            font-weight: 700;
+            padding: 14px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-            border: none;
-            padding: 1rem;
         }
-        
+
         .table tbody td {
-            padding: 1.2rem 1rem;
+            padding: 14px;
             vertical-align: middle;
-            border-bottom: 1px solid #f1f1f4;
+            border-bottom: 1px solid #f1f5f9;
         }
-
-        /* Badge Trạng thái - Soft Style */
-        .badge-status {
-            font-weight: 700;
-            padding: 8px 15px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            min-width: 130px;
-            display: inline-block;
-        }
-        .status-paid { background-color: #e8fff3; color: #50cd89; } /* Đã thanh toán - Xanh */
-        .status-unpaid { background-color: #fff5f8; color: #f1416c; } /* Chưa thanh toán - Đỏ */
-
-        /* Money text */
-        .amount-text {
-            color: #e74c3c;
-            font-weight: 800;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        /* Action Buttons */
-        .action-btn {
-            width: 35px;
-            height: 35px;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.3s;
-            text-decoration: none;
-        }
-        .btn-edit { background-color: #fff4e5; color: #ff9800; }
-        .btn-delete { background-color: #ffe5e5; color: #f44336; }
-        .action-btn:hover { transform: scale(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
         .reason-box {
-            background-color: #f8f9fa;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: #495057;
-            border-left: 3px solid #dee2e6;
+            background: #f9fafb;
+            border-left: 3px solid #9ca3af;
+            border-radius: 6px;
+            color: #374151;
+            padding: 8px 10px;
+        }
+
+        .amount-text {
+            color: #b91c1c;
+            font-weight: 700;
+        }
+
+        .badge-status {
+            border-radius: 6px;
+            display: inline-block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            min-width: 128px;
+            padding: 7px 10px;
+        }
+
+        .status-paid {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .status-unpaid {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .action-btn {
+            align-items: center;
+            border-radius: 6px;
+            display: inline-flex;
+            height: 34px;
+            justify-content: center;
+            text-decoration: none;
+            width: 34px;
+        }
+
+        .btn-edit {
+            background: #eef2ff;
+            color: #3730a3;
+        }
+
+        .btn-delete {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .empty-state {
+            color: #6b7280;
+            padding: 70px 0;
         }
     </style>
 </head>
 <body>
 
+<c:set var="homeUrl" value="${pageContext.request.contextPath}/admin-dashboard" />
+<c:if test="${sessionScope.userSession.role == 'Manager' || sessionScope.userSession.role == 'manager'}">
+    <c:set var="homeUrl" value="${pageContext.request.contextPath}/manager-dash" />
+</c:if>
+
 <div class="container-fluid py-5 px-lg-5">
     <div class="card main-card">
-        <div class="header-red d-flex justify-content-between align-items-center">
+        <div class="page-header d-flex justify-content-between align-items-center">
             <div>
-                <h4 class="mb-0 text-white fw-bold"><i class="bi bi-exclamation-octagon-fill me-2 text-white"></i>DANH SÁCH VI PHẠM</h4>
-                <small class="text-white-50">Kiểm soát xử phạt và trạng thái bồi thường</small>
+                <h4 class="mb-1 text-white fw-bold">
+                    <i class="bi bi-exclamation-octagon me-2"></i>Danh sách vi phạm
+                </h4>
+                <small class="text-white-50">Theo dõi tiền phạt và trạng thái bồi thường</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn btn-outline-light border-0">
-                    <i class="bi bi-house-door fs-5"></i>
+                <a href="${homeUrl}" class="btn btn-outline-light toolbar-btn" title="Về trang chủ">
+                    <i class="bi bi-house-door me-1"></i> Trang chủ
                 </a>
-                <a href="penalties?action=create" class="btn btn-light fw-bold px-4 shadow-sm text-danger">
-                    <i class="bi bi-plus-circle-fill me-1"></i> THÊM MỚI
+                <a href="${pageContext.request.contextPath}/penalties?action=create" class="btn btn-light toolbar-btn">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm mới
                 </a>
             </div>
         </div>
@@ -110,13 +142,13 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr class="text-center">
-                            <th>ID PHẠT</th>
-                            <th class="text-start">THÀNH VIÊN</th>
-                            <th>MÃ PHIẾU</th>
-                            <th class="text-start">LÝ DO VI PHẠM</th>
-                            <th>TIỀN PHẠT</th>
-                            <th>TRẠNG THÁI</th>
-                            <th>HÀNH ĐỘNG</th>
+                            <th>ID phạt</th>
+                            <th class="text-start">Thành viên</th>
+                            <th>Mã phiếu</th>
+                            <th class="text-start">Lý do vi phạm</th>
+                            <th>Tiền phạt</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -126,8 +158,10 @@
                                     <span class="fw-bold text-muted small">#P-${p.penaltyCode}</span>
                                 </td>
                                 <td class="text-start">
-                                    <div class="fw-bold text-dark">${p.user.fullName}</div>
-                                    <small class="text-muted"><i class="bi bi-person-badge me-1"></i>${p.user.userCode}</small>
+                                    <div class="fw-bold">${p.user.fullName}</div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-person-badge me-1"></i>${p.user.userCode}
+                                    </small>
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-primary border px-2 py-1">
@@ -135,36 +169,36 @@
                                     </span>
                                 </td>
                                 <td class="text-start">
-                                    <div class="reason-box">
-                                        ${p.reason}
-                                    </div>
+                                    <div class="reason-box">${p.reason}</div>
                                 </td>
                                 <td>
                                     <div class="amount-text">
-                                        <fmt:formatNumber value="${p.amount}" type="currency" currencySymbol="" />
-                                        <small class="fw-normal">đ</small>
+                                        <fmt:formatNumber value="${p.amount}" type="number" groupingUsed="true" />
+                                        <small>đ</small>
                                     </div>
                                 </td>
                                 <td>
                                     <c:choose>
-                                        <c:when test="${p.status == 'Đã thanh toán'}">
+                                        <c:when test="${p.status == 'Đã thanh toán' || p.status == 'Da thanh toan'}">
                                             <span class="badge-status status-paid">
-                                                <i class="bi bi-check-circle-fill me-1"></i>Đã thanh toán
+                                                <i class="bi bi-check-circle me-1"></i>Đã thanh toán
                                             </span>
                                         </c:when>
                                         <c:otherwise>
                                             <span class="badge-status status-unpaid">
-                                                <i class="bi bi-clock-fill me-1"></i>Chưa thanh toán
+                                                <i class="bi bi-clock me-1"></i>Chưa thanh toán
                                             </span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="penalties?action=update&id=${p.penaltyCode}" class="action-btn btn-edit" title="Sửa thông tin">
+                                        <a href="${pageContext.request.contextPath}/penalties?action=update&id=${p.penaltyCode}"
+                                           class="action-btn btn-edit" title="Sửa thông tin">
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>
-                                        <a href="penalties?action=delete&id=${p.penaltyCode}" class="action-btn btn-delete" 
+                                        <a href="${pageContext.request.contextPath}/penalties?action=delete&id=${p.penaltyCode}"
+                                           class="action-btn btn-delete"
                                            onclick="return confirm('Xóa bản ghi vi phạm này?')" title="Xóa dữ liệu">
                                             <i class="bi bi-trash3-fill"></i>
                                         </a>
@@ -172,12 +206,12 @@
                                 </td>
                             </tr>
                         </c:forEach>
-                        
+
                         <c:if test="${empty penalties}">
                             <tr>
-                                <td colspan="7" class="text-center py-5">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="mb-3 opacity-25">
-                                    <p class="text-muted">Hiện tại không có trường hợp vi phạm nào cần xử lý.</p>
+                                <td colspan="7" class="text-center empty-state">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
+                                    Hiện tại không có trường hợp vi phạm nào cần xử lý.
                                 </td>
                             </tr>
                         </c:if>

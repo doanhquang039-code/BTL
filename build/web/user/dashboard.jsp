@@ -120,11 +120,11 @@
                                         <c:forEach var="b" items="${userBorrows}">
                                             <tr>
                                                 <td class="ps-4">
-                                                    <div class="fw-bold text-dark">${b.bookTitle}</div>
+                                                    <div class="fw-bold text-dark">${b.book.title}</div>
                                                 </td>
                                                 <td><span class="text-danger fw-semibold">${b.dueDate}</span></td>
                                                 <td class="text-center">
-                                                    <span class="badge bg-primary-subtle rounded-pill">Đang mượn</span>
+                                                    <span class="badge bg-primary-subtle rounded-pill">${b.status}</span>
                                                 </td>
                                             </tr>
                                         </c:forEach>
@@ -153,10 +153,10 @@
                 <a href="${pageContext.request.contextPath}/books" class="list-group-item list-group-item-action border-bottom">
                     <i class="bi bi-search me-2 text-primary"></i> Tìm sách mới
                 </a>
-                <a href="history" class="list-group-item list-group-item-action border-bottom">
+                <a href="${pageContext.request.contextPath}/history" class="list-group-item list-group-item-action border-bottom">
                     <i class="bi bi-clock-history me-2 text-success"></i> Lịch sử mượn
                 </a>
-                <a href="profile" class="list-group-item list-group-item-action">
+                <a href="${pageContext.request.contextPath}/profile" class="list-group-item list-group-item-action">
                     <i class="bi bi-person-gear me-2 text-secondary"></i> Đổi mật khẩu
                 </a>
             </div>

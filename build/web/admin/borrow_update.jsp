@@ -40,7 +40,7 @@
             <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i> CHỈNH SỬA PHIẾU MƯỢN</h4>
         </div>
         <div class="card-body p-4">
-            <form action="${pageContext.request.contextPath}/borrow" method="post">
+            <form action="${pageContext.request.contextPath}/borrows" method="post">
                 <input type="hidden" name="action" value="update">
                 
                 <input type="hidden" name="borrowingCode" value="${borrowing.borrowingCode}">
@@ -94,7 +94,7 @@
                     <button type="submit" class="btn btn-update fw-bold">
                         <i class="bi bi-save me-2"></i> LƯU THAY ĐỔI
                     </button>
-                    <a href="borrow" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <a href="${pageContext.request.contextPath}/borrows" class="btn btn-outline-secondary">Hủy bỏ</a>
                 </div>
             </form>
         </div>

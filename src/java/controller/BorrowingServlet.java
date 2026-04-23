@@ -2,13 +2,17 @@ package controller;
 
 import java.io.IOException;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Borrowing;
+
+import DAO.BookDAO;
+import DAO.UserDAO;
 import model.Book;
+import model.Borrowing;
 import model.User;
 import service.BorrowingService;
 import service.impl.BorrowingServiceImpl;
@@ -16,6 +20,8 @@ import service.impl.BorrowingServiceImpl;
 @WebServlet(name = "BorrowingServlet", urlPatterns = {"/borrows"})
 public class BorrowingServlet extends HttpServlet {
     private final BorrowingService borrowingService = BorrowingServiceImpl.getInstance();
+    private final UserDAO userDAO = UserDAO.getInstance();
+    private final BookDAO bookDAO = BookDAO.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -34,9 +40,18 @@ public class BorrowingServlet extends HttpServlet {
             case "update": // MỚI: Hiển thị form sửa
                 updateGet(request, response);
                 break;
+            case "detail":
+                detailGet(request, response);
+                break;
           
             case "delete":
                 delete(request, response);
+                break;
+            case "return":
+                returnBook(request, response);
+                break;
+            case "search":
+                search(request, response);
                 break;
             default:
                 displayAll(request, response);
@@ -83,6 +98,25 @@ private void displayAll(HttpServletRequest request, HttpServletResponse response
             String dueDate = request.getParameter("dueDate");
             String status = request.getParameter("status"); // Mặc định thường là "Đang mượn"
 
+            if (userDAO.findById(userCode) == null) {
+                request.setAttribute("error", "Mã thành viên không tồn tại.");
+                createGet(request, response);
+                return;
+            }
+
+            Book selectedBook = bookDAO.findById(bookCode);
+            if (selectedBook == null) {
+                request.setAttribute("error", "Mã sách không tồn tại.");
+                createGet(request, response);
+                return;
+            }
+
+            if (selectedBook.getQuantity() <= 0) {
+                request.setAttribute("error", "Sách đã hết trong kho, không thể tạo phiếu mượn.");
+                createGet(request, response);
+                return;
+            }
+
             // Tạo đối tượng model và đóng gói dữ liệu
             Borrowing br = new Borrowing();
             
@@ -101,7 +135,7 @@ private void displayAll(HttpServletRequest request, HttpServletResponse response
             // Gọi service để xử lý (Service sẽ gọi DAO.addBorrowing và BookDAO.updateQuantity)
             borrowingService.add(br); 
             
-            response.sendRedirect("borrow?msg=success");
+            response.sendRedirect("borrows?msg=success");
         } catch (Exception e) {
             // Nếu lỗi (ví dụ sai định dạng ngày hoặc ép kiểu số), quay lại trang tạo và báo lỗi
             request.setAttribute("error", "Lỗi nhập liệu: " + e.getMessage());
@@ -116,6 +150,18 @@ private void displayAll(HttpServletRequest request, HttpServletResponse response
         Borrowing borrowing = borrowingService.findById(id); // Gọi hàm findById từ DAO
         request.setAttribute("borrowing", borrowing);
         request.getRequestDispatcher("/admin/borrow_update.jsp").forward(request, response);
+    }
+
+    private void detailGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            request.setAttribute("borrowingDetail", borrowingService.findDetailById(id));
+            request.setAttribute("backUrl", request.getContextPath() + "/borrows");
+            request.getRequestDispatcher("/manager/approval_detail.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendRedirect("borrows?msg=invalid");
+        }
     }
 
     // 5. MỚI: Xử lý cập nhật tất cả các trường
@@ -146,9 +192,9 @@ private void displayAll(HttpServletRequest request, HttpServletResponse response
             br.setStatus(status);
 
             borrowingService.update(br, borrowingCode); // Gọi hàm update all trường
-            response.sendRedirect("borrow?msg=updated");
+            response.sendRedirect("borrows?msg=updated");
         } catch (Exception e) {
-            response.sendRedirect("borrow?msg=error");
+            response.sendRedirect("borrows?msg=error");
         }
     }
 
@@ -157,6 +203,18 @@ private void displayAll(HttpServletRequest request, HttpServletResponse response
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         borrowingService.delete(id);
-        response.sendRedirect("borrow");
+        response.sendRedirect("borrows");
+    }
+
+    private void returnBook(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.sendRedirect("borrows?msg=xuLyTaiManager");
+    }
+
+    private void search(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String keyword = request.getParameter("keyword");
+        request.setAttribute("borrowings", borrowingService.searchByName(keyword));
+        request.getRequestDispatcher("/admin/borrow_list.jsp").forward(request, response);
     }
 }

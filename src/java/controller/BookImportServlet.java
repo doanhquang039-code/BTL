@@ -2,7 +2,8 @@ package controller;
 
 import DAO.BookDAO;
 import java.io.IOException;
-import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,6 +21,7 @@ import service.impl.BookServiceImpl;
 public class BookImportServlet extends HttpServlet {
     private final BookImportService importService = BookImportServiceImpl.getInstance();
     private final BookService bookService = BookServiceImpl.getInstance();
+    private static final int PAGE_SIZE = 10;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -61,8 +63,38 @@ public class BookImportServlet extends HttpServlet {
 
     private void displayAll(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<BookImport> list = importService.findAll();
-        request.setAttribute("imports", list);
+        String keyword = trimToEmpty(request.getParameter("keyword")).toLowerCase();
+        String importedBy = trimToEmpty(request.getParameter("importedBy")).toLowerCase();
+        String fromDate = trimToEmpty(request.getParameter("fromDate"));
+        String toDate = trimToEmpty(request.getParameter("toDate"));
+        String startsWith = trimToEmpty(request.getParameter("startsWith")).toUpperCase();
+        int page = parseInt(request.getParameter("page"), 1);
+
+        List<BookImport> list = new ArrayList<>(importService.findAll());
+        list.removeIf(item -> !matchImport(item, keyword, importedBy, fromDate, toDate));
+        if (!startsWith.isEmpty()) {
+            list.removeIf(item -> item.getBook() == null
+                    || item.getBook().getTitle() == null
+                    || !item.getBook().getTitle().toUpperCase().startsWith(startsWith));
+        }
+
+        int totalItems = list.size();
+        int totalPages = Math.max(1, (int) Math.ceil(totalItems / (double) PAGE_SIZE));
+        page = Math.max(1, Math.min(page, totalPages));
+        int fromIndex = (page - 1) * PAGE_SIZE;
+        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalItems);
+        List<BookImport> paged = totalItems == 0 ? List.of() : list.subList(fromIndex, toIndex);
+
+        request.setAttribute("imports", paged);
+        request.setAttribute("keyword", request.getParameter("keyword"));
+        request.setAttribute("importedBy", request.getParameter("importedBy"));
+        request.setAttribute("fromDate", fromDate);
+        request.setAttribute("toDate", toDate);
+        request.setAttribute("startsWith", startsWith);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("pageSize", PAGE_SIZE);
+        request.setAttribute("totalItems", totalItems);
         request.getRequestDispatcher("/admin/import_list.jsp").forward(request, response);
     }
 
@@ -90,7 +122,7 @@ private void executeCreate(HttpServletRequest request, HttpServletResponse respo
     try {
         BookImport bi = mapRequestToEntity(request);
         
-        // 1. Luu lich su vao bang book_imports
+        // 1. Lưu lịch sử vào bảng book_imports
         importService.add(bi); 
         
         // 2. Cap nhat Books: Tang quantity va tang ca total_imported
@@ -171,5 +203,50 @@ private void executeDelete(HttpServletRequest request, HttpServletResponse respo
         }
     }
     return bi;
+}
+
+private boolean matchImport(BookImport item, String keyword, String importedBy, String fromDate, String toDate) {
+    String bookTitle = item.getBook() != null && item.getBook().getTitle() != null ? item.getBook().getTitle().toLowerCase() : "";
+    String bookCode = item.getBook() != null ? String.valueOf(item.getBook().getBookCode()) : "";
+    String importer = item.getImportedBy() != null ? item.getImportedBy().toLowerCase() : "";
+    String importId = String.valueOf(item.getImportId());
+
+    boolean keywordMatched = keyword.isEmpty()
+            || bookTitle.contains(keyword)
+            || importer.contains(keyword)
+            || bookCode.contains(keyword)
+            || importId.contains(keyword);
+    if (!keywordMatched) {
+        return false;
+    }
+
+    if (!importedBy.isEmpty() && !importer.contains(importedBy)) {
+        return false;
+    }
+
+    if (item.getImportDate() == null) {
+        return fromDate.isEmpty() && toDate.isEmpty();
+    }
+    LocalDate importDate = item.getImportDate().toLocalDateTime().toLocalDate();
+
+    if (!fromDate.isEmpty() && importDate.isBefore(LocalDate.parse(fromDate))) {
+        return false;
+    }
+    if (!toDate.isEmpty() && importDate.isAfter(LocalDate.parse(toDate))) {
+        return false;
+    }
+    return true;
+}
+
+private String trimToEmpty(String value) {
+    return value == null ? "" : value.trim();
+}
+
+private int parseInt(String value, int defaultValue) {
+    try {
+        return Integer.parseInt(trimToEmpty(value));
+    } catch (NumberFormatException e) {
+        return defaultValue;
+    }
 }
 }

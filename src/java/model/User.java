@@ -1,8 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
+
+import java.math.BigDecimal;
 
 public class User {
     private int userCode;
@@ -10,6 +8,14 @@ public class User {
     private String password;
     private String fullName;
     private String role;
+    private String birthDate;
+    private String position;
+    private String address;
+    private String identityNumber;
+    private String cardIssueDate;
+    private String cardExpiryDate;
+    private BigDecimal depositAmount;
+    private int maxBorrowBooks;
 
     public User() {}
 
@@ -21,7 +27,6 @@ public class User {
         this.role = role;
     }
 
-    // Getters and Setters
     public int getUserCode() { return userCode; }
     public void setUserCode(int userCode) { this.userCode = userCode; }
 
@@ -36,4 +41,28 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getBirthDate() { return birthDate; }
+    public void setBirthDate(String birthDate) { this.birthDate = birthDate; }
+
+    public String getPosition() { return position; }
+    public void setPosition(String position) { this.position = position; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getIdentityNumber() { return identityNumber; }
+    public void setIdentityNumber(String identityNumber) { this.identityNumber = identityNumber; }
+
+    public String getCardIssueDate() { return cardIssueDate; }
+    public void setCardIssueDate(String cardIssueDate) { this.cardIssueDate = cardIssueDate; }
+
+    public String getCardExpiryDate() { return cardExpiryDate; }
+    public void setCardExpiryDate(String cardExpiryDate) { this.cardExpiryDate = cardExpiryDate; }
+
+    public BigDecimal getDepositAmount() { return depositAmount; }
+    public void setDepositAmount(BigDecimal depositAmount) { this.depositAmount = depositAmount; }
+
+    public int getMaxBorrowBooks() { return maxBorrowBooks; }
+    public void setMaxBorrowBooks(int maxBorrowBooks) { this.maxBorrowBooks = maxBorrowBooks; }
 }

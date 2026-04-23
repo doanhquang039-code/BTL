@@ -48,7 +48,7 @@
                 </div>
             </c:if>
 
-            <form action="${pageContext.request.contextPath}/borrow" method="post">
+            <form action="${pageContext.request.contextPath}/borrows" method="post">
                 <input type="hidden" name="action" value="create">
 
                 <div class="row">
@@ -93,7 +93,7 @@
                     <button type="submit" class="btn btn-save fw-bold shadow-sm">
                         <i class="bi bi-check-lg me-2"></i> TẠO PHIẾU MƯỢN
                     </button>
-                    <a href="borrow" class="btn btn-light text-muted">Hủy và quay lại</a>
+                    <a href="${pageContext.request.contextPath}/borrows" class="btn btn-light text-muted">Hủy và quay lại</a>
                 </div>
             </form>
         </div>

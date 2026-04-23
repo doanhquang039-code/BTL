@@ -1,13 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package service.impl;
 
 import DAO.ReservationDAO;
-import model.Reservation;
-import service.ReservationService;
+import java.time.LocalDate;
 import java.util.List;
+import model.Book;
+import model.Reservation;
+import model.User;
+import service.ReservationService;
 
 public class ReservationServiceImpl extends ReservationService {
     private final ReservationDAO reservationDAO;
@@ -25,41 +24,72 @@ public class ReservationServiceImpl extends ReservationService {
     }
 
     @Override
-    public void add(Reservation e) {
-        // Mặc định khi đặt chỗ sẽ để ngày hiện tại và trạng thái "Đang chờ"
-        reservationDAO.createReservation(e);
+    public void add(Reservation reservation) {
+        reservationDAO.createReservation(reservation);
     }
 
-  @Override
-    public void update(Reservation e, int id) {
-        // Đảm bảo đối tượng Reservation có đúng ID (khóa chính) trước khi update
-        e.setReservationCode(id);
-        
-        // Gọi hàm update toàn bộ thuộc tính từ DAO
-        reservationDAO.update(e);
+    @Override
+    public void add(int userCode, int bookCode) {
+        createForUser(userCode, bookCode);
     }
+
+    @Override
+    public boolean createForUser(int userCode, int bookCode) {
+        User user = new User();
+        user.setUserCode(userCode);
+
+        Book book = new Book();
+        book.setBookCode(bookCode);
+
+        Reservation reservation = new Reservation();
+        reservation.setUser(user);
+        reservation.setBook(book);
+        reservation.setReserveDate(LocalDate.now().toString());
+        reservation.setStatus("Đang chờ");
+        reservation.setNotified(false);
+
+        return reservationDAO.createReservation(reservation);
+    }
+
+    @Override
+    public void update(Reservation reservation, int id) {
+        reservation.setReservationCode(id);
+        reservationDAO.update(reservation);
+    }
+
     @Override
     public void delete(int id) {
-        // Hủy lượt đặt trước nếu người dùng không còn nhu cầu
         reservationDAO.delete(id);
     }
 
     @Override
     public List<Reservation> findAll() {
-        // Lấy toàn bộ danh sách đặt chỗ để Admin theo dõi
         return reservationDAO.findAll();
     }
 
     @Override
     public Reservation findById(int id) {
-        // Nếu cần tìm một lượt đặt chỗ cụ thể để sửa
-        // Bạn có thể bổ sung findById vào DAO nếu cần thiết
-        return null;
+        return reservationDAO.findById(id);
+    }
+
+    @Override
+    public boolean existsPendingReservation(int userCode, int bookCode) {
+        return reservationDAO.existsPendingReservation(userCode, bookCode);
+    }
+
+    @Override
+    public boolean existsPendingReservationExcluding(int userCode, int bookCode, int reservationCode) {
+        return reservationDAO.existsPendingReservationExcluding(userCode, bookCode, reservationCode);
     }
 
     @Override
     public List<Reservation> searchByName(String name) {
-        // Có thể triển khai tìm kiếm trong danh sách findAll() bằng Java Stream
-        return null;
+        String keyword = name == null ? "" : name.toLowerCase();
+        return reservationDAO.findAll().stream()
+                .filter(r -> (r.getUser() != null && r.getUser().getFullName() != null
+                        && r.getUser().getFullName().toLowerCase().contains(keyword))
+                        || (r.getBook() != null && r.getBook().getTitle() != null
+                        && r.getBook().getTitle().toLowerCase().contains(keyword)))
+                .toList();
     }
 }

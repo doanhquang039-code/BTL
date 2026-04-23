@@ -14,8 +14,9 @@ import model.Reservation;
  */
 public abstract class ReservationService implements Activity<Reservation>,Search<Reservation>{
 
-    public void add(int userCode, int bookCode) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public abstract void add(int userCode, int bookCode);
+    public abstract boolean createForUser(int userCode, int bookCode);
+    public abstract boolean existsPendingReservation(int userCode, int bookCode);
+    public abstract boolean existsPendingReservationExcluding(int userCode, int bookCode, int reservationCode);
     
 }

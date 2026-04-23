@@ -53,6 +53,7 @@
         .status-returned { background-color: #e8fff3; color: #50cd89; } /* Đã trả - Xanh lá nhạt */
         .status-overdue { background-color: #fff5f8; color: #f1416c; }  /* Quá hạn - Đỏ nhạt */
         .status-borrowing { background-color: #fff8dd; color: #ffc700; } /* Đang mượn - Vàng nhạt */
+        .status-return-pending { background-color: #eef4ff; color: #3f6ad8; } /* Chờ duyệt trả - Xanh dương */
 
         .user-info .name { font-weight: 700; color: #181c32; display: block; }
         .user-info .id { font-size: 0.8rem; color: #a1a5b7; }
@@ -73,6 +74,13 @@
 <body>
 
 <div class="container-fluid py-5 px-4">
+    <c:if test="${param.msg == 'invalid'}">
+        <div class="alert alert-warning">Mã phiếu không hợp lệ.</div>
+    </c:if>
+    <c:if test="${param.msg == 'xuLyTaiManager'}">
+        <div class="alert alert-info">Yêu cầu mượn/trả được xử lý tại màn Duyệt của manager. Admin chỉ xem toàn bộ dữ liệu.</div>
+    </c:if>
+
     <div class="card main-card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
@@ -80,10 +88,13 @@
                 <small class="text-muted">Theo dõi và phê duyệt trạng thái sách</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn btn-outline-light btn-sm">
+                <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-house"></i>
                 </a>
-                <a href="borrow?action=create" class="btn btn-primary btn-sm px-3 shadow">
+                <a href="${pageContext.request.contextPath}/approvals" class="btn btn-outline-info btn-sm">
+                    Duyệt manager
+                </a>
+                <a href="borrows?action=create" class="btn btn-primary btn-sm px-3 shadow">
                     <i class="bi bi-plus-lg me-1"></i> Tạo phiếu mới
                 </a>
             </div>
@@ -92,7 +103,7 @@
         <div class="card-body p-4">
             <div class="row mb-4">
                 <div class="col-md-4">
-                    <form action="borrow" method="get" class="input-group">
+                    <form action="borrows" method="get" class="input-group">
                         <input type="hidden" name="action" value="search">
                         <input type="text" name="keyword" class="form-control form-control-sm border-end-0" placeholder="Tìm theo mã hoặc tên...">
                         <button class="btn btn-sm btn-light border border-start-0" type="submit">
@@ -136,32 +147,45 @@
                                 </td>
                                 <td>
                                     <c:choose>
+                                        <c:when test="${b.status == 'Chờ duyệt' || b.status == 'Pending'}">
+                                            <span class="badge-status status-borrowing">Chờ duyệt</span>
+                                        </c:when>
+                                        <c:when test="${b.status == 'Từ chối' || b.status == 'Rejected'}">
+                                            <span class="badge-status status-overdue">Từ chối</span>
+                                        </c:when>
                                         <c:when test="${b.status == 'Đã trả'}">
+                                            <span class="badge-status status-returned">Đã trả</span>
+                                        </c:when>
+                                        <c:when test="${b.status == 'Returned'}">
                                             <span class="badge-status status-returned">Đã trả</span>
                                         </c:when>
                                         <c:when test="${b.status == 'Quá hạn'}">
                                             <span class="badge-status status-overdue">Quá hạn</span>
                                         </c:when>
-                                        <c:otherwise>
+                                        <c:when test="${b.status == 'Overdue'}">
+                                            <span class="badge-status status-overdue">Quá hạn</span>
+                                        </c:when>
+                                        <c:when test="${b.status == 'Chờ duyệt trả' || b.status == 'ReturnPending'}">
+                                            <span class="badge-status status-return-pending">Chờ duyệt trả</span>
+                                        </c:when>
+                                        <c:when test="${b.status == 'Đang mượn' || b.status == 'Borrowing'}">
                                             <span class="badge-status status-borrowing">Đang mượn</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge-status status-borrowing">${b.status}</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="borrow?action=update&id=${b.borrowingCode}" 
+                                        <a href="borrows?action=detail&id=${b.borrowingCode}" 
+                                           class="btn btn-outline-secondary btn-action" title="Xem chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="borrows?action=update&id=${b.borrowingCode}" 
                                            class="btn btn-light-warning btn-action text-warning border" title="Sửa thông tin">
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>
-                                        
-                                        <c:if test="${b.status != 'Đã trả'}">
-                                            <a href="borrow?action=return&id=${b.borrowingCode}" 
-                                               class="btn btn-light-danger btn-action text-danger border" 
-                                               title="Xác nhận trả sách"
-                                               onclick="return confirm('Xác nhận độc giả đã trả sách?')">
-                                                <i class="bi bi-arrow-return-left"></i>
-                                            </a>
-                                        </c:if>
                                     </div>
                                 </td>
                             </tr>

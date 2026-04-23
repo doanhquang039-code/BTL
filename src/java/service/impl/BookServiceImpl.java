@@ -41,4 +41,9 @@ public class BookServiceImpl extends BookService {
     public List<Book> searchByName(String name) {
         return bookDAO.searchByName(name);
     }
+
+    @Override
+    public void updateStock(int bookCode, int quantity) {
+        bookDAO.updateStock(bookCode, quantity);
+    }
 }

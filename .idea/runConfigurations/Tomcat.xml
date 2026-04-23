@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Tomcat" type="TomcatLocal" factoryName="Tomcat Local">
+    <option name="SERVER_NAME" value="Tomcat" />
+    <option name="BROWSER_ID" value="a7b3d4e0-976f-4c4d-a03e-b1e2c3d4e5f6" />
+    <option name="RUN_ON_FRAME_DEACTIVATION" value="false" />
+    <option name="RUN_ON_FRAME_DEACTIVATION_CONDITION" value="default" />
+    <deployment>
+      <artifact name="unnamed">
+        <settings>
+          <option name="CONTEXT_PATH" value="/Quanlythuvien" />
+        </settings>
+      </artifact>
+    </deployment>
+    <method v="2">
+      <option name="BuildArtifacts" enabled="true">
+        <artifact name="unnamed" />
+      </option>
+    </method>
+  </configuration>
+</component>
+

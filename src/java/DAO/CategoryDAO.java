@@ -21,7 +21,6 @@ public class CategoryDAO implements Activity<Category> {
     private static CategoryDAO instance;
 
     // Các câu lệnh SQL khớp với database QuanLyThuVien
-    private final String INSERT_INTO = "INSERT INTO Categories (name) VALUES (?)";
     private final String UPDATE_BY_ID = "UPDATE Categories SET name = ? WHERE categorycode = ?";
     private final String DELETE_BY_ID = "DELETE FROM Categories WHERE categorycode = ?";
     private final String FIND_ALL = "SELECT * FROM Categories";
@@ -47,8 +46,10 @@ public class CategoryDAO implements Activity<Category> {
 
     @Override
     public void add(Category category) {
-        try (PreparedStatement ps = connection.prepareStatement(INSERT_INTO)) {
-            ps.setString(1, category.getName());
+        String sql = "INSERT INTO Categories (categorycode, name) VALUES (?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, nextId("Categories", "categorycode"));
+            ps.setString(2, category.getName());
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Lỗi khi thêm Category: " + e.getMessage());
@@ -112,6 +113,28 @@ public class CategoryDAO implements Activity<Category> {
     }
 
     public int countAll() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String sql = "SELECT COUNT(*) FROM Categories";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Loi khi dem Category: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    private int nextId(String tableName, String idColumn) {
+        String sql = "SELECT COALESCE(MAX(" + idColumn + "), 0) + 1 FROM " + tableName;
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Loi khi sinh ID moi cho " + tableName + ": " + e.getMessage());
+        }
+        return 1;
     }
 }
